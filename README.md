@@ -31,7 +31,7 @@ ADMIN_PIN = "ELEGIR_UN_PIN_LARGO_Y_PRIVADO"
 GITHUB_TOKEN = "PEGAR_AQUI_TOKEN_FINE_GRAINED"
 \`\`\`
 
-**No pegar el PIN ni el token en GitHub, en el código, en capturas, ni en este chat.**
+**No pegar el PIN ni el token en GitHub, en el código, en capturas, ni en este chat.** Elegir un PIN largo y no reutilizado; la protección por PIN es básica y no sustituye autenticación robusta.
 
 Para \`GITHUB_TOKEN\`, crear un **Fine-grained Personal Access Token** desde la configuración de GitHub:
 - Propietario: \`floresgrancelli\`.
@@ -47,6 +47,7 @@ Hasta que estos Secrets estén configurados, el programa es de **solo lectura**,
 
 Con el PIN correcto, la pestaña **ADMIN** permite:
 - Registrar las series de un ejercicio, con peso en kg o lb y repeticiones.
+- Cargar y corregir el peso corporal por fecha, para generar gráficos semanales públicos.
 - Guardar en \`data/history.json\` con la fecha, semana, día y observaciones.
 - Actualizar una sesión anterior registrando de nuevo el mismo ejercicio y fecha.
 - Editar el texto del plan; GitHub redepliega automáticamente la nueva versión.
