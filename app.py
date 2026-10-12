@@ -287,9 +287,9 @@ TOKEN = secret("GITHUB_TOKEN")
 ADMIN_PIN = secret("ADMIN_PIN")
 
 announce(
-    "EFG TRAINING  /  PERSONAL TRAINING SYSTEM  ·  V1.0",
-    "TRAIN HARD.<br>TRACK SMART.",
-    "Tu rutina, tus marcas, tu evolución. Seguimiento real con diseño premium.",
+    "EFG TRAINING  /  PERFORMANCE LAB  ·  V1.0",
+    "LA CIENCIA<br>TAMBIÉN ENTRENA.",
+    "Fuerza, método y datos para medir cada avance.",
 )
 
 tabs = st.tabs(["⚡ MI RUTINA", "📊 PROGRESO", "📚 HISTORIAL", "⚖️ PESO", "🔐 ADMIN"])
