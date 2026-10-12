@@ -95,6 +95,23 @@ st.markdown(
        -webkit-background-clip:text; -webkit-text-fill-color:transparent}
     .hero-signature {font-size:.76rem;color:#BBA6D2;letter-spacing:.045em;margin-top:7px;font-weight:500}
     .hero-sub {font-size:1.07rem;color:#D8CAE9;margin:13px 0 0}
+    /* Coloreado integral de rectángulos por tipo de bloque */
+    [class*="st-key-efg_triserie_"] div[data-testid="stExpander"] {
+      background:linear-gradient(108deg,rgba(13,97,151,.54),rgba(18,46,85,.84))!important;
+      border:1px solid rgba(40,205,242,.74)!important;
+      box-shadow:inset 4px 0 0 #22D3EE,0 0 14px rgba(34,211,238,.10)!important;
+    }
+    [class*="st-key-efg_superserie_"] div[data-testid="stExpander"] {
+      background:linear-gradient(108deg,rgba(110,33,160,.51),rgba(47,22,86,.89))!important;
+      border:1px solid rgba(222,114,255,.65)!important;
+      box-shadow:inset 4px 0 0 #D946EF,0 0 14px rgba(217,70,239,.10)!important;
+    }
+    .efg-legend {display:flex;flex-wrap:wrap;gap:9px;margin:2px 0 17px;}
+    .efg-legend-item {padding:7px 11px;border:1px solid rgba(190,169,218,.22);
+       border-radius:100px;font-size:.79rem;font-weight:750;color:#F2E9FF}
+    .efg-legend-tri {background:rgba(15,104,150,.34);border-color:rgba(34,211,238,.65)}
+    .efg-legend-ss {background:rgba(111,38,161,.39);border-color:rgba(217,70,239,.61)}
+    .efg-legend-uni {background:rgba(22,17,40,.73)}
     .pill {display:inline-block;background:rgba(124,58,237,.22);
        color:#D8B6FF; border:1px solid rgba(186,114,253,.32);
        font-size:.72rem;font-weight:800;letter-spacing:.04em;
@@ -320,41 +337,61 @@ with tabs[0]:
         unsafe_allow_html=True,
     )
     st.write("")
+    st.markdown(
+        '<div class="efg-legend" aria-label="Código visual de los bloques">'
+        '<span class="efg-legend-item efg-legend-tri">AZUL · Triserie</span>'
+        '<span class="efg-legend-item efg-legend-ss">VIOLETA · Superserie</span>'
+        '<span class="efg-legend-item efg-legend-uni">OSCURO · Individual</span>'
+        '</div>', unsafe_allow_html=True,
+    )
+    if day == 3 and week in (2, 3, 4):
+        st.caption(
+            "Nota del Excel: en esta semana, el circuito abdominal del miércoles "
+            "solo tiene dos ejercicios; no figura el tercero."
+        )
     for index, ex in enumerate(chosen, 1):
-        with st.expander(f"{index:02}. {ex['exercise']}  ·  {ex['series']} × {ex['repetitions']}"):
-            x, y, z = st.columns(3)
-            x.metric("Series", ex["series"] or "—")
-            y.metric("Repeticiones", ex["repetitions"] or "—")
-            z.metric("Esfuerzo", ex["intensity"] or "—")
-            if ex.get("pattern"):
-                st.caption(f"**Grupo / patrón:** {ex['pattern']}")
-            if ex.get("block"):
-                st.caption(f"**Bloque:** {ex['block']}")
-            if ex.get("notes"):
-                st.write(f"**Indicaciones:** {ex['notes']}")
-            ref = ex if week == 1 else week_one_references.get(ex["exercise"].strip().casefold())
-            if ref:
-                if ref.get("reference_series_kg"):
-                    string = " · ".join(f"{fmt(w)} kg" for w in ref["reference_series_kg"])
-                    st.info(f"Referencia Excel (semana 1, por serie): {string}")
-                elif ref.get("reference_weight_lb") is not None:
-                    st.info(
-                        f"Referencia Excel (semana 1): "
-                        f"{fmt(ref.get('reference_weight_lb'))} lb "
-                        f"≈ {fmt(ref.get('reference_weight_kg'))} kg. "
-                        "No constituye un entrenamiento registrado."
+        kind = ex.get("set_type", "individual")
+        if kind not in ("individual", "superserie", "triserie"):
+            kind = "individual"
+        group = ex.get("set_group", "")
+        type_label = "TRISERIE" if kind == "triserie" else "SUPERSERIE"
+        group_tag = f"  ·  {type_label} {group}" if kind != "individual" else ""
+        display_label = f"{index:02}. {ex['exercise']}  ·  {ex['series']} × {ex['repetitions']}{group_tag}"
+        with st.container(key=f"efg_{kind}_{ex['id']}"):
+            with st.expander(display_label):
+                x, y, z = st.columns(3)
+                x.metric("Series", ex["series"] or "—")
+                y.metric("Repeticiones", ex["repetitions"] or "—")
+                z.metric("Esfuerzo", ex["intensity"] or "—")
+                if ex.get("pattern"):
+                    st.caption(f"**Grupo / patrón:** {ex['pattern']}")
+                if ex.get("block"):
+                    st.caption(f"**Bloque:** {ex['block']}")
+                if ex.get("notes"):
+                    st.write(f"**Indicaciones:** {ex['notes']}")
+                ref = ex if week == 1 else week_one_references.get(ex["exercise"].strip().casefold())
+                if ref:
+                    if ref.get("reference_series_kg"):
+                        string = " · ".join(f"{fmt(w)} kg" for w in ref["reference_series_kg"])
+                        st.info(f"Referencia Excel (semana 1, por serie): {string}")
+                    elif ref.get("reference_weight_lb") is not None:
+                        st.info(
+                            f"Referencia Excel (semana 1): "
+                            f"{fmt(ref.get('reference_weight_lb'))} lb "
+                            f"≈ {fmt(ref.get('reference_weight_kg'))} kg. "
+                            "No constituye un entrenamiento registrado."
+                        )
+                recorded = [
+                    r for r in SESSIONS if r.get("exercise_id") == ex["id"]
+                ]
+                if recorded:
+                    newest = sorted(recorded, key=lambda d: d.get("date", ""), reverse=True)[0]
+                    st.caption(
+                        "Última sesión real cargada: "
+                        f"{newest.get('date')} · "
+                        f"{len(newest.get('sets', []))} series"
                     )
-            recorded = [
-                r for r in SESSIONS if r.get("exercise_id") == ex["id"]
-            ]
-            if recorded:
-                newest = sorted(recorded, key=lambda d: d.get("date", ""), reverse=True)[0]
-                st.caption(
-                    "Última sesión real cargada: "
-                    f"{newest.get('date')} · "
-                    f"{len(newest.get('sets', []))} series"
-                )
-
+    
     st.markdown("")
     st.caption(
         "Transcripción fiel del plan de cuatro semanas. Cargas de la planilla = referencias "
@@ -480,7 +517,7 @@ with tabs[2]:
 
     plan_rows = pd.DataFrame(PLAN)
     included = ["week","day","pattern","block","exercise","series","repetitions",
-                "intensity","notes","reference_weight_lb","reference_weight_kg",
+                "intensity","notes","set_type","set_group","reference_weight_lb","reference_weight_kg",
                 "reference_weight_lb_text"]
     st.download_button(
         "⬇️ Descargar plan completo (4 semanas) en CSV",
@@ -665,6 +702,29 @@ with tabs[4]:
                     e_sets = st.text_input("Series", value=target["series"])
                     e_reps = st.text_input("Repeticiones", value=target["repetitions"])
                     e_rir = st.text_input("Intensidad / RIR", value=target["intensity"])
+                    kind_options = ["individual", "superserie", "triserie"]
+                    initial_kind = target.get("set_type", "individual")
+                    if initial_kind not in kind_options:
+                        initial_kind = "individual"
+                    e_kind = st.selectbox(
+                        "Tipo de bloque", kind_options,
+                        index=kind_options.index(initial_kind),
+                        format_func=lambda x: {
+                            "individual": "Ejercicio individual",
+                            "superserie": "Superserie (violeta)",
+                            "triserie": "Triserie (azul)",
+                        }[x],
+                    )
+                    group_options = ["", "A", "B", "C", "D", "E", "F", "G", "H"]
+                    initial_group = target.get("set_group", "")
+                    if initial_group not in group_options:
+                        initial_group = ""
+                    e_group = st.selectbox(
+                        "Grupo del bloque", group_options,
+                        index=group_options.index(initial_group),
+                        format_func=lambda x: x or "Sin grupo / ejercicio individual",
+                        help="Usá la misma letra para los ejercicios que van juntos.",
+                    )
                     e_pattern = st.text_input("Patrón muscular", value=target["pattern"])
                     e_block = st.text_input("Bloque / orden", value=target["block"])
                     e_notes = st.text_area("Observaciones técnicas", value=target["notes"])
@@ -675,6 +735,8 @@ with tabs[4]:
                 if update_plan:
                     if not e_name.strip() or not e_sets.strip():
                         st.error("El nombre y las series son obligatorios.")
+                    elif e_kind != "individual" and not e_group:
+                        st.error("Elegí la letra del grupo de la superserie o triserie.")
                     else:
                         try:
                             current, _ = fetch_remote("data/plan.json", TOKEN)
@@ -687,6 +749,8 @@ with tabs[4]:
                                 "series":e_sets.strip()[:40],
                                 "repetitions":e_reps.strip()[:40],
                                 "intensity":e_rir.strip()[:100],
+                                "set_type":e_kind,
+                                "set_group":e_group if e_kind != "individual" else "",
                                 "pattern":e_pattern.strip()[:100],
                                 "block":e_block.strip()[:100],
                                 "notes":e_notes.strip()[:1600],
