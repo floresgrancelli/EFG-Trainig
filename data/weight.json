@@ -1,4 +1,30 @@
 {
   "schema_version": 1,
-  "measurements": []
+  "measurements": [
+    {
+      "date": "2026-08-29",
+      "kg": 77.2,
+      "notes": "IMC 25,5 · 10:14 hs"
+    },
+    {
+      "date": "2026-09-19",
+      "kg": 79,
+      "notes": "IMC 26,1 · 08:55 hs"
+    },
+    {
+      "date": "2026-09-27",
+      "kg": 77.15,
+      "notes": "IMC 25,5 · 08:39 hs"
+    },
+    {
+      "date": "2026-10-04",
+      "kg": 77.75,
+      "notes": "IMC 25,7 · 08:33 hs"
+    },
+    {
+      "date": "2026-10-11",
+      "kg": 77.3,
+      "notes": "IMC 25,5 · 09:00 hs"
+    }
+  ]
 }
