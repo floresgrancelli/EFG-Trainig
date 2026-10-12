@@ -702,6 +702,72 @@ with tabs[4]:
                         except (requests.RequestException, ValueError, KeyError, TypeError) as error:
                             st.error(f"No se pudo actualizar el plan: {error}")
 
+
+            with edit_tabs[2]:
+                st.markdown("#### ⚖️ Registrar peso corporal")
+                st.caption(
+                    "Una medición por fecha. Si volvés a guardar la misma fecha, "
+                    "se actualiza el valor anterior. El registro es público."
+                )
+                with st.form("weight_form", clear_on_submit=False):
+                    weight_date = st.date_input(
+                        "Fecha del pesaje", value=date.today(),
+                        format="DD/MM/YYYY", key="weight_date"
+                    )
+                    weight_value = st.number_input(
+                        "Peso corporal (kg)", min_value=20.0, max_value=350.0,
+                        value=80.0, step=0.1, format="%.2f", key="weight_value"
+                    )
+                    weight_notes = st.text_area(
+                        "Observaciones opcionales",
+                        placeholder="Ej.: pesaje matutino, antes de desayunar",
+                        key="weight_notes"
+                    )
+                    weight_submit = st.form_submit_button(
+                        "💾 GUARDAR PESO CORPORAL", type="primary",
+                        use_container_width=True
+                    )
+
+                if weight_submit:
+                    try:
+                        current, _ = fetch_remote("data/weight.json", TOKEN)
+                        existing = current.get("measurements", [])
+                        if not isinstance(existing, list):
+                            raise ValueError("La estructura de los pesajes no es válida.")
+                        saved = [
+                            row for row in existing
+                            if str(row.get("date", "")) != weight_date.isoformat()
+                        ]
+                        saved.append({
+                            "date": weight_date.isoformat(),
+                            "kg": round(float(weight_value), 2),
+                            "notes": weight_notes.strip()[:400],
+                            "saved_at": datetime.now(timezone.utc).isoformat(),
+                        })
+                        saved.sort(key=lambda row: row.get("date", ""))
+                        persist_remote(
+                            "data/weight.json",
+                            {"schema_version": 1, "measurements": saved},
+                            TOKEN,
+                            f"EFG Training: registrar peso corporal {weight_date.isoformat()}",
+                        )
+                        public_weight.clear()
+                        st.success("Peso corporal guardado. Ya figura en la pestaña pública de Peso.")
+                        st.rerun()
+                    except (requests.RequestException, ValueError, KeyError, TypeError) as error:
+                        st.error(f"No se pudo guardar el peso corporal: {error}")
+
+                if MEASUREMENTS:
+                    st.markdown("**Pesajes ya registrados**")
+                    weight_rows = sorted(
+                        [
+                            {"Fecha": r.get("date", ""), "Peso (kg)": r.get("kg", "")}
+                            for r in MEASUREMENTS
+                        ],
+                        key=lambda item: item["Fecha"], reverse=True
+                    )
+                    st.dataframe(weight_rows, hide_index=True, use_container_width=True)
+
 st.divider()
 st.markdown(
     '<div class="mini-title">EFG TRAINING / STRENGTH IN NUMBERS · by EFG</div>'
