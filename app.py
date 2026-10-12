@@ -96,34 +96,44 @@ st.markdown(
        -webkit-background-clip:text; -webkit-text-fill-color:transparent}
     .hero-signature {font-size:.76rem;color:#BBA6D2;letter-spacing:.045em;margin-top:7px;font-weight:500}
     .hero-sub {font-size:1.07rem;color:#D8CAE9;margin:13px 0 0}
-    /* Coloreado integral de rectángulos por tipo de bloque */
-    [class*="st-key-efg_triserie_"] div[data-testid="stExpander"] {
-      background:linear-gradient(108deg,rgba(13,97,151,.54),rgba(18,46,85,.84))!important;
-      border:1px solid rgba(40,205,242,.74)!important;
-      box-shadow:inset 4px 0 0 #22D3EE,0 0 14px rgba(34,211,238,.10)!important;
-    }
+    /* Se conservan todos los fondos oscuros originales. Solo se destaca la tipografía. */
+    [class*="st-key-efg_triserie_"] div[data-testid="stExpander"],
     [class*="st-key-efg_superserie_"] div[data-testid="stExpander"] {
-      background:linear-gradient(108deg,rgba(110,33,160,.51),rgba(47,22,86,.89))!important;
-      border:1px solid rgba(222,114,255,.65)!important;
-      box-shadow:inset 4px 0 0 #D946EF,0 0 14px rgba(217,70,239,.10)!important;
+      background:rgba(22,17,40,.73)!important;
+      border:1px solid rgba(164,101,249,.27)!important;
+      box-shadow:none!important;
+    }
+    [class*="st-key-efg_triserie_"] div[data-testid="stExpander"] summary p,
+    [class*="st-key-efg_triserie_"] div[data-testid="stExpander"] summary span {
+      color:#53EFFF!important;font-weight:850!important;
+      text-shadow:0 0 13px rgba(34,211,238,.28);
+    }
+    [class*="st-key-efg_superserie_"] div[data-testid="stExpander"] summary p,
+    [class*="st-key-efg_superserie_"] div[data-testid="stExpander"] summary span {
+      color:#FF85F4!important;font-weight:850!important;
+      text-shadow:0 0 13px rgba(236,72,227,.28);
     }
     .efg-legend {display:flex;flex-wrap:wrap;gap:9px;margin:2px 0 17px;}
     .efg-legend-item {padding:7px 11px;border:1px solid rgba(190,169,218,.22);
-       border-radius:100px;font-size:.79rem;font-weight:750;color:#F2E9FF}
-    .efg-legend-tri {background:rgba(15,104,150,.34);border-color:rgba(34,211,238,.65)}
-    .efg-legend-ss {background:rgba(111,38,161,.39);border-color:rgba(217,70,239,.61)}
-    .efg-legend-uni {background:rgba(22,17,40,.73)}
+       border-radius:100px;font-size:.79rem;font-weight:850;background:rgba(22,17,40,.73)}
+    .efg-legend-tri {color:#53EFFF;border-color:rgba(34,211,238,.48)}
+    .efg-legend-ss {color:#FF85F4;border-color:rgba(217,70,239,.48)}
+    .efg-legend-uni {color:#F2E9FF}
     /* Vista compacta de rutina, optimizada para consultar en el gimnasio */
     .quick-group {margin:0 0 13px;padding:11px 12px 9px;border-radius:16px;
         border:1px solid rgba(192,165,231,.22);background:rgba(22,17,40,.76)}
-    .quick-group.triserie {border-color:rgba(34,211,238,.70);
-        background:linear-gradient(110deg,rgba(13,92,137,.49),rgba(18,30,57,.89))}
-    .quick-group.superserie {border-color:rgba(217,70,239,.64);
-        background:linear-gradient(110deg,rgba(108,34,152,.45),rgba(35,22,65,.90))}
-    .quick-group-title {font-size:.73rem;font-weight:900;letter-spacing:.105em;
+    .quick-group.triserie, .quick-group.superserie {
+        background:rgba(22,17,40,.76);border-color:rgba(192,165,231,.22)}
+    .quick-group-title {font-size:.80rem;font-weight:900;letter-spacing:.11em;
         text-transform:uppercase;color:#F4E6FF;padding:0 8px 7px}
-    .quick-group.triserie .quick-group-title {color:#8EEDFF}
-    .quick-group.superserie .quick-group-title {color:#F4B4FF}
+    .quick-group.triserie .quick-group-title {color:#53EFFF;
+        text-shadow:0 0 12px rgba(34,211,238,.30)}
+    .quick-group.superserie .quick-group-title {color:#FF85F4;
+        text-shadow:0 0 12px rgba(236,72,227,.30)}
+    .quick-group.triserie .quick-ex {color:#53EFFF;font-weight:900}
+    .quick-group.superserie .quick-ex {color:#FF85F4;font-weight:900}
+    .quick-group.triserie .quick-num {color:#53EFFF}
+    .quick-group.superserie .quick-num {color:#FF85F4}
     .quick-cols {display:grid;grid-template-columns:minmax(0,2.3fr) minmax(70px,.65fr) minmax(95px,1fr);
         gap:10px;align-items:center;padding:5px 9px;color:#B4A8C6;
         font-size:.72rem;font-weight:700;letter-spacing:.04em}
@@ -407,13 +417,17 @@ with tabs[0]:
                 if ref:
                     if ref.get("reference_series_kg"):
                         string = " · ".join(f"{fmt(w)} kg" for w in ref["reference_series_kg"])
-                        st.info(f"Referencia Excel (semana 1, por serie): {string}")
+                        maximum = max(ref["reference_series_kg"])
+                        st.info(
+                            f"Cargas utilizadas el último mes (Excel), por serie: {string}. "
+                            f"Máximo: {fmt(maximum)} kg."
+                        )
                     elif ref.get("reference_weight_lb") is not None:
                         st.info(
-                            f"Referencia Excel (semana 1): "
+                            f"Máximo utilizado el último mes (Excel): "
                             f"{fmt(ref.get('reference_weight_lb'))} lb "
                             f"≈ {fmt(ref.get('reference_weight_kg'))} kg. "
-                            "No constituye un entrenamiento registrado."
+                            "Referencia histórica; no es un entrenamiento nuevo registrado en la app."
                         )
                 recorded = [
                     r for r in SESSIONS if r.get("exercise_id") == ex["id"]
@@ -428,8 +442,9 @@ with tabs[0]:
     
     st.markdown("")
     st.caption(
-        "Transcripción fiel del plan de cuatro semanas. Cargas de la planilla = referencias "
-        "sin fecha, no avances semanales. Los espacios sin datos permanecen vacíos."
+        "Plan original de cuatro semanas. Los pesos del Excel son los máximos utilizados "
+        "durante el último mes de entrenamiento, según lo informado por Edu. "
+        "Son referencias históricas sin fechas individuales, no registros nuevos de la app."
     )
 
 with tabs[1]:
@@ -492,9 +507,12 @@ with tabs[1]:
                 weight_label = "0 " + summary_unit
             else:
                 weight_label = fmt(number * scale, 1) + " " + summary_unit
-        source_label = "Referencia del Excel"
+        if isinstance(sequence, list) and sequence:
+            source_label = "Último mes (Excel) · máximo: " + fmt(max(sequence) * scale, 1) + " " + summary_unit
+        else:
+            source_label = "Máximo del último mes · Excel"
         if int(ref.get("week", 1)) != summary_week:
-            source_label += " · sem. 1"
+            source_label += " · referencia sem. 1"
         return weight_label, source_label
 
     def quick_recent(exercise):
@@ -584,9 +602,11 @@ with tabs[1]:
     if HISTORY.get("_offline"):
         st.warning("No se pudo actualizar el historial: pueden faltar los últimos pesos reales.")
     st.caption(
-        "Pesos indicados = referencias de la planilla, NO entrenamientos realizados. "
-        "Los pesos que ya hayas guardado aparecen aparte como «Último real». "
-        "Los guiones indican que no hay una carga informada."
+        "Los pesos del Excel son tus máximos utilizados el último mes, según tu aclaración: "
+        "sirven como referencia y no son registros nuevos de entrenamiento. "
+        "Las cargas históricas por serie aparecen por separado cuando existen. "
+        "«Último real» identifica los entrenamientos guardados en esta app. "
+        "Un guion significa que falta un peso de referencia."
     )
 
 
