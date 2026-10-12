@@ -1,0 +1,32 @@
+name: Validar EFG Training
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Verificar sintaxis Python
+        run: python -m py_compile app.py
+      - name: Validar importación de la rutina
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          plan = json.loads(pathlib.Path('data/plan.json').read_text(encoding='utf-8'))
+          arr = plan["entries"]
+          assert len(arr) == 182, len(arr)
+          assert [sum(r["week"]==w for r in arr) for w in (1,2,3,4)] == [46,46,45,45]
+          assert len({r["day"] for r in arr}) == 5
+          assert sum(r["week"]==1 and r["reference_weight_lb"] is not None for r in arr) == 32
+          assert any(r["reference_series_kg"] and len(r["reference_series_kg"])==4 for r in arr)
+          blob = pathlib.Path('data/plan.json').read_text(encoding='utf-8').casefold()
+          assert 'belutrainer' not in blob and 'rutina diseñada por' not in blob
+          hist = json.loads(pathlib.Path('data/history.json').read_text(encoding='utf-8'))
+          assert isinstance(hist["sessions"], list)
+          print("OK: plan completo y sin atribución personal")
+          PY
