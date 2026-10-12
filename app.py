@@ -21,6 +21,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import requests
+from visuals import render_plan_charts, render_calendar, render_weight_chart
 
 st.set_page_config(
     page_title="EFG Training | Strength & Progress",
@@ -151,6 +152,17 @@ def public_history() -> dict:
         return {"sessions": [], "_offline": True}
 
 
+@st.cache_data(ttl=45, show_spinner=False)
+def public_weight() -> dict:
+    try:
+        data, _ = fetch_remote("data/weight.json")
+        if isinstance(data.get("measurements"), list):
+            return data
+        return {"measurements": [], "_offline": True}
+    except (requests.RequestException, ValueError, KeyError, TypeError):
+        return {"measurements": [], "_offline": True}
+
+
 def persist_remote(path: str, payload: dict, token: str, message: str) -> None:
     if not token:
         raise ValueError("Falta configurar GITHUB_TOKEN en los Secrets de Streamlit.")
@@ -267,6 +279,8 @@ def announce(kicker, title, sub):
 
 PLAN = load_plan_local()
 HISTORY = public_history()
+WEIGHT = public_weight()
+MEASUREMENTS = WEIGHT.get("measurements", [])
 SESSIONS = HISTORY.get("sessions", [])
 DF = series_rows(SESSIONS)
 TOKEN = secret("GITHUB_TOKEN")
@@ -278,7 +292,7 @@ announce(
     "Tu rutina, tus marcas, tu evolución. Seguimiento real con diseño premium.",
 )
 
-tabs = st.tabs(["⚡ MI RUTINA", "📊 PROGRESO", "📚 HISTORIAL", "🔐 ADMIN"])
+tabs = st.tabs(["⚡ MI RUTINA", "📊 PROGRESO", "📚 HISTORIAL", "⚖️ PESO", "🔐 ADMIN"])
 
 with tabs[0]:
     st.markdown("### ⚡ Plan de entrenamiento")
@@ -349,6 +363,9 @@ with tabs[0]:
 
 with tabs[1]:
     st.markdown("### 📊 Tu evolución, en números")
+    render_plan_charts(PLAN)
+    st.divider()
+    st.markdown("### 📈 Rendimiento registrado")
     if HISTORY.get("_offline"):
         st.warning("No se pudo consultar el historial online. Los registros pueden no estar actualizados.")
     if DF.empty:
@@ -438,6 +455,7 @@ with tabs[1]:
             "peso corporal, cargas bilaterales/unilaterales equivalentes o isométricos. "
             "Compará el mismo ejercicio y condiciones."
         )
+        render_calendar(SESSIONS)
 
 with tabs[2]:
     st.markdown("### 📚 Registro público de sesiones")
@@ -472,6 +490,14 @@ with tabs[2]:
     )
 
 with tabs[3]:
+    st.markdown("### ⚖️ Evolución del peso corporal")
+    st.caption("Mediciones reales, registradas por fecha y visibles para todos.")
+    if WEIGHT.get("_offline"):
+        st.warning("No se pudieron actualizar las mediciones desde GitHub.")
+    render_weight_chart(MEASUREMENTS)
+
+
+with tabs[4]:
     st.markdown("### 🔐 Panel de administración")
     st.caption("La aplicación es pública. Este panel requiere tu PIN para guardar o modificar.")
 
@@ -513,7 +539,7 @@ with tabs[3]:
                     st.session_state["efg_admin_ok"] = False
                     st.rerun()
 
-            edit_tabs = st.tabs(["🏋️ Cargar entrenamiento", "✏️ Editar rutina"])
+            edit_tabs = st.tabs(["🏋️ Cargar entrenamiento", "✏️ Editar rutina", "⚖️ Peso corporal"])
             with edit_tabs[0]:
                 col1, col2, col3 = st.columns(3)
                 with col1:
