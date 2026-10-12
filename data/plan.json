@@ -22,7 +22,9 @@
       "reference_weight_lb": 25,
       "reference_weight_kg": 11.34,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s2-d1-f9",
@@ -40,7 +42,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s3-d1-f9",
@@ -58,7 +62,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s4-d1-f9",
@@ -76,7 +82,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s1-d1-f10",
@@ -94,7 +102,9 @@
       "reference_weight_lb": 35,
       "reference_weight_kg": 15.88,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s2-d1-f10",
@@ -112,7 +122,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s3-d1-f10",
@@ -130,7 +142,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s4-d1-f10",
@@ -148,7 +162,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s1-d1-f11",
@@ -166,7 +182,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s2-d1-f11",
@@ -184,7 +202,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s3-d1-f11",
@@ -202,7 +222,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s4-d1-f11",
@@ -220,7 +242,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s1-d1-f12",
@@ -238,7 +262,9 @@
       "reference_weight_lb": 75,
       "reference_weight_kg": 34.02,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s2-d1-f12",
@@ -256,7 +282,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s3-d1-f12",
@@ -274,7 +302,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s4-d1-f12",
@@ -292,7 +322,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s1-d1-f13",
@@ -310,7 +342,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s2-d1-f13",
@@ -328,7 +362,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s3-d1-f13",
@@ -346,7 +382,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s4-d1-f13",
@@ -364,7 +402,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s1-d1-f14",
@@ -382,7 +422,9 @@
       "reference_weight_lb": 45,
       "reference_weight_kg": 20.41,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s2-d1-f14",
@@ -400,7 +442,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s3-d1-f14",
@@ -418,7 +462,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s4-d1-f14",
@@ -436,7 +482,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s1-d1-f15",
@@ -454,7 +502,9 @@
       "reference_weight_lb": 85,
       "reference_weight_kg": 38.56,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s2-d1-f15",
@@ -472,7 +522,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s3-d1-f15",
@@ -490,7 +542,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s4-d1-f15",
@@ -508,7 +562,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s1-d1-f16",
@@ -526,7 +582,9 @@
       "reference_weight_lb": 32.5,
       "reference_weight_kg": 14.74,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s2-d1-f16",
@@ -544,7 +602,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s3-d1-f16",
@@ -562,7 +622,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s4-d1-f16",
@@ -580,7 +642,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s1-d1-f17",
@@ -598,7 +662,9 @@
       "reference_weight_lb": 85,
       "reference_weight_kg": 38.56,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s2-d1-f17",
@@ -616,7 +682,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s3-d1-f17",
@@ -634,7 +702,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s4-d1-f17",
@@ -652,7 +722,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s2-d1-f18",
@@ -670,7 +742,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s1-d2-f21",
@@ -688,7 +762,9 @@
       "reference_weight_lb": 25,
       "reference_weight_kg": 11.34,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s2-d2-f21",
@@ -706,7 +782,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s3-d2-f21",
@@ -724,7 +802,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s4-d2-f21",
@@ -742,7 +822,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s1-d2-f22",
@@ -760,7 +842,9 @@
       "reference_weight_lb": 25,
       "reference_weight_kg": 11.34,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s2-d2-f22",
@@ -778,7 +862,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s3-d2-f22",
@@ -796,7 +882,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s4-d2-f22",
@@ -814,7 +902,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s1-d2-f23",
@@ -832,7 +922,9 @@
       "reference_weight_lb": 25,
       "reference_weight_kg": 11.34,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s2-d2-f23",
@@ -850,7 +942,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s3-d2-f23",
@@ -868,7 +962,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s4-d2-f23",
@@ -886,7 +982,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s1-d2-f24",
@@ -904,7 +1002,9 @@
       "reference_weight_lb": 80,
       "reference_weight_kg": 36.29,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s2-d2-f24",
@@ -922,7 +1022,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s3-d2-f24",
@@ -940,7 +1042,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s4-d2-f24",
@@ -958,7 +1062,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s1-d2-f25",
@@ -976,7 +1082,9 @@
       "reference_weight_lb": 160,
       "reference_weight_kg": 72.57,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s2-d2-f25",
@@ -994,7 +1102,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s3-d2-f25",
@@ -1012,7 +1122,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s4-d2-f25",
@@ -1030,7 +1142,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s1-d2-f26",
@@ -1048,7 +1162,9 @@
       "reference_weight_lb": 50,
       "reference_weight_kg": 22.68,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s2-d2-f26",
@@ -1066,7 +1182,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s3-d2-f26",
@@ -1084,7 +1202,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s4-d2-f26",
@@ -1102,7 +1222,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s1-d2-f27",
@@ -1120,7 +1242,9 @@
       "reference_weight_lb": 210,
       "reference_weight_kg": 95.25,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "C"
     },
     {
       "id": "s2-d2-f27",
@@ -1138,7 +1262,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "C"
     },
     {
       "id": "s3-d2-f27",
@@ -1156,7 +1282,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "C"
     },
     {
       "id": "s4-d2-f27",
@@ -1174,7 +1302,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "C"
     },
     {
       "id": "s1-d2-f28",
@@ -1192,7 +1322,9 @@
       "reference_weight_lb": 150,
       "reference_weight_kg": 68.04,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "C"
     },
     {
       "id": "s2-d2-f28",
@@ -1210,7 +1342,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "C"
     },
     {
       "id": "s3-d2-f28",
@@ -1228,7 +1362,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "C"
     },
     {
       "id": "s4-d2-f28",
@@ -1246,7 +1382,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "C"
     },
     {
       "id": "s1-d2-f29",
@@ -1264,7 +1402,9 @@
       "reference_weight_lb": 40,
       "reference_weight_kg": 18.14,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s2-d2-f29",
@@ -1282,7 +1422,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s3-d2-f29",
@@ -1300,7 +1442,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s4-d2-f29",
@@ -1318,7 +1462,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s1-d3-f33",
@@ -1336,7 +1482,9 @@
       "reference_weight_lb": 25,
       "reference_weight_kg": 11.34,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s2-d3-f33",
@@ -1354,7 +1502,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s3-d3-f33",
@@ -1372,7 +1522,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s4-d3-f33",
@@ -1390,7 +1542,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s1-d3-f34",
@@ -1408,7 +1562,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s2-d3-f34",
@@ -1426,7 +1582,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s3-d3-f34",
@@ -1444,7 +1602,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s4-d3-f34",
@@ -1462,7 +1622,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s1-d3-f35",
@@ -1480,7 +1642,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s1-d3-f36",
@@ -1498,7 +1662,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s2-d3-f36",
@@ -1516,7 +1682,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s3-d3-f36",
@@ -1534,7 +1702,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s4-d3-f36",
@@ -1552,7 +1722,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s1-d3-f37",
@@ -1570,7 +1742,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s2-d3-f37",
@@ -1588,7 +1762,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s3-d3-f37",
@@ -1606,7 +1782,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s4-d3-f37",
@@ -1624,7 +1802,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s1-d3-f38",
@@ -1642,7 +1822,9 @@
       "reference_weight_lb": 50,
       "reference_weight_kg": 22.68,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s2-d3-f38",
@@ -1660,7 +1842,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s3-d3-f38",
@@ -1678,7 +1862,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s4-d3-f38",
@@ -1696,7 +1882,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s1-d3-f39",
@@ -1714,7 +1902,9 @@
       "reference_weight_lb": 62.5,
       "reference_weight_kg": 28.35,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s2-d3-f39",
@@ -1732,7 +1922,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s3-d3-f39",
@@ -1750,7 +1942,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s4-d3-f39",
@@ -1768,7 +1962,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s1-d3-f40",
@@ -1786,7 +1982,9 @@
       "reference_weight_lb": 12.5,
       "reference_weight_kg": 5.67,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s2-d3-f40",
@@ -1804,7 +2002,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s3-d3-f40",
@@ -1822,7 +2022,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s4-d3-f40",
@@ -1840,7 +2042,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s1-d4-f44",
@@ -1858,7 +2062,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s2-d4-f44",
@@ -1876,7 +2082,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s3-d4-f44",
@@ -1894,7 +2102,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s4-d4-f44",
@@ -1912,7 +2122,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s1-d4-f45",
@@ -1930,7 +2142,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s2-d4-f45",
@@ -1948,7 +2162,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s3-d4-f45",
@@ -1966,7 +2182,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s4-d4-f45",
@@ -1984,7 +2202,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s1-d4-f46",
@@ -2002,7 +2222,9 @@
       "reference_weight_lb": 25,
       "reference_weight_kg": 11.34,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s2-d4-f46",
@@ -2020,7 +2242,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s3-d4-f46",
@@ -2038,7 +2262,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s4-d4-f46",
@@ -2056,7 +2282,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s1-d4-f47",
@@ -2074,7 +2302,9 @@
       "reference_weight_lb": 25,
       "reference_weight_kg": 11.34,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s2-d4-f47",
@@ -2092,7 +2322,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s3-d4-f47",
@@ -2110,7 +2342,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s4-d4-f47",
@@ -2128,7 +2362,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s1-d4-f48",
@@ -2146,7 +2382,9 @@
       "reference_weight_lb": 75,
       "reference_weight_kg": 34.02,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s2-d4-f48",
@@ -2164,7 +2402,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s3-d4-f48",
@@ -2182,7 +2422,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s4-d4-f48",
@@ -2200,7 +2442,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s1-d4-f49",
@@ -2218,7 +2462,9 @@
       "reference_weight_lb": 180,
       "reference_weight_kg": 81.65,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s2-d4-f49",
@@ -2236,7 +2482,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s3-d4-f49",
@@ -2254,7 +2502,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s4-d4-f49",
@@ -2272,7 +2522,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s1-d4-f50",
@@ -2290,7 +2542,9 @@
       "reference_weight_lb": 50,
       "reference_weight_kg": 22.68,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s2-d4-f50",
@@ -2308,7 +2562,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s3-d4-f50",
@@ -2326,7 +2582,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s4-d4-f50",
@@ -2344,7 +2602,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s1-d4-f51",
@@ -2367,7 +2627,9 @@
         40.82,
         49.9,
         49.9
-      ]
+      ],
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s2-d4-f51",
@@ -2385,7 +2647,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s3-d4-f51",
@@ -2403,7 +2667,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s4-d4-f51",
@@ -2421,7 +2687,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s1-d4-f52",
@@ -2439,7 +2707,9 @@
       "reference_weight_lb": 60,
       "reference_weight_kg": 27.22,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s2-d4-f52",
@@ -2457,7 +2727,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s3-d4-f52",
@@ -2475,7 +2747,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s4-d4-f52",
@@ -2493,7 +2767,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s1-d4-f53",
@@ -2511,7 +2787,9 @@
       "reference_weight_lb": 35,
       "reference_weight_kg": 15.88,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "C"
     },
     {
       "id": "s2-d4-f53",
@@ -2529,7 +2807,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "C"
     },
     {
       "id": "s3-d4-f53",
@@ -2547,7 +2827,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "C"
     },
     {
       "id": "s4-d4-f53",
@@ -2565,7 +2847,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "C"
     },
     {
       "id": "s1-d4-f54",
@@ -2583,7 +2867,9 @@
       "reference_weight_lb": 40,
       "reference_weight_kg": 18.14,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "C"
     },
     {
       "id": "s2-d4-f54",
@@ -2601,7 +2887,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "C"
     },
     {
       "id": "s3-d4-f54",
@@ -2619,7 +2907,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "C"
     },
     {
       "id": "s4-d4-f54",
@@ -2637,7 +2927,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "C"
     },
     {
       "id": "s1-d5-f58",
@@ -2655,7 +2947,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s2-d5-f58",
@@ -2673,7 +2967,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s3-d5-f58",
@@ -2691,7 +2987,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s4-d5-f58",
@@ -2709,7 +3007,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s1-d5-f59",
@@ -2727,7 +3027,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s2-d5-f59",
@@ -2745,7 +3047,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s3-d5-f59",
@@ -2763,7 +3067,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s4-d5-f59",
@@ -2781,7 +3087,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s1-d5-f60",
@@ -2799,7 +3107,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s2-d5-f60",
@@ -2817,7 +3127,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s3-d5-f60",
@@ -2835,7 +3147,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s4-d5-f60",
@@ -2853,7 +3167,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "triserie",
+      "set_group": "A"
     },
     {
       "id": "s1-d5-f61",
@@ -2871,7 +3187,9 @@
       "reference_weight_lb": 45,
       "reference_weight_kg": 20.41,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s2-d5-f61",
@@ -2889,7 +3207,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s3-d5-f61",
@@ -2907,7 +3227,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s4-d5-f61",
@@ -2925,7 +3247,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s1-d5-f62",
@@ -2943,7 +3267,9 @@
       "reference_weight_lb": 70,
       "reference_weight_kg": 31.75,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s2-d5-f62",
@@ -2961,7 +3287,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s3-d5-f62",
@@ -2979,7 +3307,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s4-d5-f62",
@@ -2997,7 +3327,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s1-d5-f63",
@@ -3015,7 +3347,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s2-d5-f63",
@@ -3033,7 +3367,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s3-d5-f63",
@@ -3051,7 +3387,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s4-d5-f63",
@@ -3069,7 +3407,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s1-d5-f64",
@@ -3087,7 +3427,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s2-d5-f64",
@@ -3105,7 +3447,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s3-d5-f64",
@@ -3123,7 +3467,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s4-d5-f64",
@@ -3141,7 +3487,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "superserie",
+      "set_group": "B"
     },
     {
       "id": "s1-d5-f65",
@@ -3159,7 +3507,9 @@
       "reference_weight_lb": 150,
       "reference_weight_kg": 68.04,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s2-d5-f65",
@@ -3177,7 +3527,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s3-d5-f65",
@@ -3195,7 +3547,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s4-d5-f65",
@@ -3213,7 +3567,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s1-d5-f66",
@@ -3231,7 +3587,9 @@
       "reference_weight_lb": 170,
       "reference_weight_kg": 77.11,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s2-d5-f66",
@@ -3249,7 +3607,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s3-d5-f66",
@@ -3267,7 +3627,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     },
     {
       "id": "s4-d5-f66",
@@ -3285,7 +3647,9 @@
       "reference_weight_lb": null,
       "reference_weight_kg": null,
       "reference_weight_lb_text": null,
-      "reference_series_kg": null
+      "reference_series_kg": null,
+      "set_type": "individual",
+      "set_group": ""
     }
   ]
 }
