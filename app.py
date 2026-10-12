@@ -92,6 +92,7 @@ st.markdown(
        line-height:1.05; font-weight:900;
        background:linear-gradient(92deg,#FFF 2%,#E7C4FF 46%,#D99AFF 78%,#FF9EDB);
        -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+    .hero-signature {font-size:.76rem;color:#BBA6D2;letter-spacing:.045em;margin-top:7px;font-weight:500}
     .hero-sub {font-size:1.07rem;color:#D8CAE9;margin:13px 0 0}
     .pill {display:inline-block;background:rgba(124,58,237,.22);
        color:#D8B6FF; border:1px solid rgba(186,114,253,.32);
@@ -255,7 +256,8 @@ def series_rows(sessions):
 def announce(kicker, title, sub):
     st.markdown(
         f'<div class="hero"><div class="hero-kicker">{kicker}</div>'
-        f'<h1>{title}</h1><div class="hero-sub">{sub}</div>'
+        f'<h1>{title}</h1><div class="hero-signature">by EFG</div>'
+        f'<div class="hero-sub">{sub}</div>'
         f'<div style="margin-top:18px"><span class="pill">5 DÍAS</span>'
         f'<span class="pill">4 SEMANAS</span>'
         f'<span class="pill">FUERZA + DATOS</span></div></div>',
@@ -271,7 +273,7 @@ TOKEN = secret("GITHUB_TOKEN")
 ADMIN_PIN = secret("ADMIN_PIN")
 
 announce(
-    "EFG TRAINING  /  by EFG  ·  V1.0",
+    "EFG TRAINING  /  PERSONAL TRAINING SYSTEM  ·  V1.0",
     "TRAIN HARD.<br>TRACK SMART.",
     "Tu rutina, tus marcas, tu evolución. Seguimiento real con diseño premium.",
 )
