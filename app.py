@@ -521,7 +521,7 @@ with tabs[2]:
                 "reference_weight_lb_text"]
     st.download_button(
         "⬇️ Descargar plan completo (4 semanas) en CSV",
-        plan_rows[included].to_csv(index=False).encode("utf-8-sig"),
+        plan_rows.reindex(columns=included, fill_value="").to_csv(index=False).encode("utf-8-sig"),
         "efg_training_plan_completo.csv", "text/csv",
         help="Incluye los ejercicios y pesos de referencia que existían en el Excel original."
     )
