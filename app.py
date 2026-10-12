@@ -271,7 +271,7 @@ TOKEN = secret("GITHUB_TOKEN")
 ADMIN_PIN = secret("ADMIN_PIN")
 
 announce(
-    "EFG  /  PERSONAL TRAINING SYSTEM  ·  V1.0",
+    "EFG TRAINING  /  by EFG  ·  V1.0",
     "TRAIN HARD.<br>TRACK SMART.",
     "Tu rutina, tus marcas, tu evolución. Seguimiento real con diseño premium.",
 )
@@ -676,7 +676,7 @@ with tabs[3]:
 
 st.divider()
 st.markdown(
-    '<div class="mini-title">EFG TRAINING / STRENGTH IN NUMBERS</div>'
+    '<div class="mini-title">EFG TRAINING / STRENGTH IN NUMBERS · by EFG</div>'
     '<p class="muted">Rutina pública · Modificaciones protegidas · Datos almacenados en GitHub. '
     'Los indicadores son de entrenamiento, no evaluaciones médicas.</p>',
     unsafe_allow_html=True,
