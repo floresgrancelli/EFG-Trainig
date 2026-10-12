@@ -12,7 +12,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Verificar sintaxis Python
-        run: python -m py_compile app.py
+        run: python -m py_compile app.py visuals.py
       - name: Validar importación de la rutina
         run: |
           python - <<'PY'
@@ -28,5 +28,7 @@ jobs:
           assert 'belutrainer' not in blob and 'rutina diseñada por' not in blob
           hist = json.loads(pathlib.Path('data/history.json').read_text(encoding='utf-8'))
           assert isinstance(hist["sessions"], list)
+          weights = json.loads(pathlib.Path('data/weight.json').read_text(encoding='utf-8'))
+          assert isinstance(weights["measurements"], list)
           print("OK: plan completo y sin atribución personal")
           PY
