@@ -22,7 +22,7 @@ App independiente de entrenamiento, con estética negro/púrpura, rutina importa
 ## Publicar en Streamlit Community Cloud
 
 1. Ingresar en [share.streamlit.io](https://share.streamlit.io), autenticar con GitHub y elegir **New app**.
-2. Elegir repositorio \`floresgrancelli/EFG-Trainig\`, rama \`main\` y main file path \`app.py\`.
+2. Elegir repositorio \`floresgrancelli/EFG-Training\`, rama \`main\` y main file path \`app.py\`.
 3. Elegir un subdominio disponible, por ejemplo \`efg-training\`.
 4. En **App settings > Secrets**, configurar **solo dentro de Streamlit Cloud**:
 
@@ -35,7 +35,7 @@ GITHUB_TOKEN = "PEGAR_AQUI_TOKEN_FINE_GRAINED"
 
 Para \`GITHUB_TOKEN\`, crear un **Fine-grained Personal Access Token** desde la configuración de GitHub:
 - Propietario: \`floresgrancelli\`.
-- Acceso únicamente a este repositorio (\`EFG-Trainig\`).
+- Acceso únicamente a este repositorio (\`EFG-Training\`).
 - Repository permissions: **Contents = Read and write** (los demás permisos mínimos que exija GitHub).
 - Mantenerlo secreto. Renovarlo antes de su vencimiento.
 
