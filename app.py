@@ -29,7 +29,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-REPO = "floresgrancelli/EFG-Trainig"
+REPO = "floresgrancelli/EFG-Training"
 BRANCH = "main"
 API = f"https://api.github.com/repos/{REPO}/contents"
 PURPLE = "#A855F7"
