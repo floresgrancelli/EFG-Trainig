@@ -556,13 +556,13 @@ with tabs[3]:
                         with b:
                             loaded = st.number_input(
                                 f"Carga ({units}) · S{i+1}", 0.0, 1500.0,
-                                value=round(weight,2), step=2.5, key=f"weight_{i}",
+                                value=round(weight,2), step=2.5, key=f"weight_{ex['id']}_{edit_date.isoformat()}_{units}_{i}",
                             )
                         with c:
                             rep = st.number_input(
                                 f"Reps · S{i+1}", 0, 10000,
                                 value=int(oldset.get("reps",0)) if oldset else reps_plan[i],
-                                step=1, key=f"reps_{i}",
+                                step=1, key=f"reps_{ex['id']}_{edit_date.isoformat()}_{i}",
                             )
                         new_sets.append({
                             "kg":round(loaded * (0.45359237 if units=="lb" else 1.0), 3),
