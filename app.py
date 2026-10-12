@@ -9,6 +9,7 @@ from __future__ import annotations
 import base64
 import csv
 import hmac
+from html import escape as html_escape
 import io
 import json
 import math
@@ -112,6 +113,39 @@ st.markdown(
     .efg-legend-tri {background:rgba(15,104,150,.34);border-color:rgba(34,211,238,.65)}
     .efg-legend-ss {background:rgba(111,38,161,.39);border-color:rgba(217,70,239,.61)}
     .efg-legend-uni {background:rgba(22,17,40,.73)}
+    /* Vista compacta de rutina, optimizada para consultar en el gimnasio */
+    .quick-group {margin:0 0 13px;padding:11px 12px 9px;border-radius:16px;
+        border:1px solid rgba(192,165,231,.22);background:rgba(22,17,40,.76)}
+    .quick-group.triserie {border-color:rgba(34,211,238,.70);
+        background:linear-gradient(110deg,rgba(13,92,137,.49),rgba(18,30,57,.89))}
+    .quick-group.superserie {border-color:rgba(217,70,239,.64);
+        background:linear-gradient(110deg,rgba(108,34,152,.45),rgba(35,22,65,.90))}
+    .quick-group-title {font-size:.73rem;font-weight:900;letter-spacing:.105em;
+        text-transform:uppercase;color:#F4E6FF;padding:0 8px 7px}
+    .quick-group.triserie .quick-group-title {color:#8EEDFF}
+    .quick-group.superserie .quick-group-title {color:#F4B4FF}
+    .quick-cols {display:grid;grid-template-columns:minmax(0,2.3fr) minmax(70px,.65fr) minmax(95px,1fr);
+        gap:10px;align-items:center;padding:5px 9px;color:#B4A8C6;
+        font-size:.72rem;font-weight:700;letter-spacing:.04em}
+    .quick-row {display:grid;grid-template-columns:minmax(0,2.3fr) minmax(70px,.65fr) minmax(95px,1fr);
+        align-items:center;gap:10px;padding:10px 9px;border-radius:9px;
+        background:rgba(11,10,27,.32);margin-bottom:4px}
+    .quick-ex {min-width:0;font-size:.93rem;line-height:1.23;font-weight:800;color:#FCF8FF;overflow-wrap:anywhere}
+    .quick-num {color:#BDA0DD;padding-right:6px;font-size:.77rem}
+    .quick-note {font-size:.73rem;font-weight:500;color:#BAACCD;margin-top:4px;line-height:1.35}
+    .quick-count {font-size:.99rem;font-weight:850;color:#F5E7FF;white-space:nowrap}
+    .quick-load {font-size:.87rem;font-weight:800;color:#B4FAEB;overflow-wrap:anywhere}
+    .quick-muted {color:#B6A6CA;font-weight:600}
+    .quick-loading-note {color:#BAACCD;font-size:.71rem;line-height:1.35;font-weight:500;margin-top:4px}
+    @media(max-width:640px) {
+      .quick-row {grid-template-columns:minmax(62px,.68fr) minmax(110px,1fr);gap:5px 8px}
+      .quick-ex {grid-column:1/-1;font-size:.93rem}
+      .quick-cols {grid-template-columns:1fr 1fr}
+      .quick-cols span:first-child {display:none}
+      .quick-count {font-size:.95rem}
+      .quick-load {font-size:.85rem}
+      .quick-group {padding:9px 8px}
+    }
     .pill {display:inline-block;background:rgba(124,58,237,.22);
        color:#D8B6FF; border:1px solid rgba(186,114,253,.32);
        font-size:.72rem;font-weight:800;letter-spacing:.04em;
@@ -309,7 +343,7 @@ announce(
     "Fuerza, método y datos para medir cada avance.",
 )
 
-tabs = st.tabs(["⚡ MI RUTINA", "📊 PROGRESO", "📚 HISTORIAL", "⚖️ PESO", "🔐 ADMIN"])
+tabs = st.tabs(["⚡ MI RUTINA", "📋 RUTINA RESUMEN", "📊 PROGRESO", "📚 HISTORIAL", "⚖️ PESO", "🔐 ADMIN"])
 
 with tabs[0]:
     st.markdown("### ⚡ Plan de entrenamiento")
@@ -399,6 +433,164 @@ with tabs[0]:
     )
 
 with tabs[1]:
+    st.markdown("### 📋 Rutina resumen")
+    st.caption("Modo gimnasio: todos los ejercicios y sus bloques a simple vista, sin desplegar fichas.")
+    qw, qd, qu = st.columns([1, 1.3, .8])
+    with qw:
+        summary_week = st.selectbox(
+            "SEMANA", [1, 2, 3, 4], format_func=lambda v: f"Semana {v}",
+            key="quick_week",
+        )
+    with qd:
+        summary_day = st.selectbox(
+            "DÍA", [1, 2, 3, 4, 5],
+            format_func=lambda v: DAY_NAMES[v - 1], key="quick_day",
+        )
+    with qu:
+        summary_unit = st.selectbox("PESO EN", ["lb", "kg"], key="quick_unit")
+    day_exercises = [
+        x for x in PLAN
+        if int(x["week"]) == summary_week and int(x["day"]) == summary_day
+    ]
+    week1_refs = {
+        x["exercise"].strip().casefold(): x for x in PLAN
+        if int(x["week"]) == 1 and (
+            x.get("reference_weight_kg") is not None
+            or x.get("reference_series_kg")
+        )
+    }
+    last_by_exercise = {}
+    for record in SESSIONS:
+        if not isinstance(record, dict):
+            continue
+        exercise_id = str(record.get("exercise_id", ""))
+        last_key = str(record.get("date", ""))
+        if exercise_id and (
+            exercise_id not in last_by_exercise
+            or last_key > str(last_by_exercise[exercise_id].get("date", ""))
+        ):
+            last_by_exercise[exercise_id] = record
+
+    def quick_weight_text(exercise):
+        ref = exercise if (
+            exercise.get("reference_weight_kg") is not None
+            or exercise.get("reference_series_kg")
+        ) else week1_refs.get(exercise["exercise"].strip().casefold())
+        if not ref:
+            return "—", "Sin peso de referencia"
+        scale = 1 if summary_unit == "kg" else 1 / 0.45359237
+        sequence = ref.get("reference_series_kg")
+        if isinstance(sequence, list) and sequence:
+            amounts = [fmt(float(value) * scale, 1) for value in sequence]
+            weight_label = " / ".join(amounts) + " " + summary_unit
+        else:
+            amount = ref.get("reference_weight_kg")
+            if amount is None:
+                return "—", "Sin peso de referencia"
+            number = float(amount)
+            if number == 0:
+                weight_label = "0 " + summary_unit
+            else:
+                weight_label = fmt(number * scale, 1) + " " + summary_unit
+        source_label = "Referencia del Excel"
+        if int(ref.get("week", 1)) != summary_week:
+            source_label += " · sem. 1"
+        return weight_label, source_label
+
+    def quick_recent(exercise):
+        record = last_by_exercise.get(exercise["id"])
+        if not record:
+            return ""
+        values = []
+        scale = 1 if summary_unit == "kg" else 1 / 0.45359237
+        for series in record.get("sets", []):
+            try:
+                load = float(series.get("kg", 0))
+                if not math.isfinite(load) or load < 0:
+                    continue
+                values.append(fmt(load * scale, 1))
+            except (TypeError, ValueError):
+                continue
+        if not values:
+            return ""
+        day_recorded = html_escape(str(record.get("date", "")))
+        return f"Último real ({day_recorded}): {' / '.join(values)} {summary_unit}"
+
+    st.markdown(
+        f'<div class="finish" style="margin:12px 0 15px;padding:16px 20px">'
+        f'<div class="mini-title">VISTA RÁPIDA · ENTRENAMIENTO</div>'
+        f'<h3 style="margin:3px 0 4px">SEMANA {summary_week} · {DAY_NAMES[summary_day - 1].upper()}</h3>'
+        f'<div class="muted">{len(day_exercises)} ejercicios · cargas en {summary_unit}</div></div>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '<div class="efg-legend" aria-label="Referencia visual">'
+        '<span class="efg-legend-item efg-legend-tri">AZUL · Triserie</span>'
+        '<span class="efg-legend-item efg-legend-ss">VIOLETA · Superserie</span>'
+        '<span class="efg-legend-item efg-legend-uni">OSCURO · Individual</span>'
+        '</div>', unsafe_allow_html=True,
+    )
+
+    groups = []
+    for position, item in enumerate(day_exercises, 1):
+        kind = str(item.get("set_type", "individual"))
+        if kind not in ("superserie", "triserie"):
+            kind = "individual"
+        letter = str(item.get("set_group", "")).strip() if kind != "individual" else ""
+        group_key = (kind, letter) if kind != "individual" else ("individual", position)
+        if not groups or groups[-1]["key"] != group_key:
+            groups.append({"key": group_key, "kind": kind, "letter": letter, "items": []})
+        groups[-1]["items"].append((position, item))
+
+    html_parts = []
+    for group in groups:
+        kind = group["kind"]
+        if kind == "triserie":
+            heading = f"TRISERIE {html_escape(group['letter'])} · {len(group['items'])} ejercicios"
+        elif kind == "superserie":
+            heading = f"SUPERSERIE {html_escape(group['letter'])} · {len(group['items'])} ejercicios"
+        else:
+            heading = "EJERCICIO INDIVIDUAL"
+        html_parts.append(
+            f'<section class="quick-group {kind}">'
+            f'<div class="quick-group-title">{heading}</div>'
+            '<div class="quick-cols"><span>EJERCICIO</span><span>SERIES × REPS</span><span>PESO</span></div>'
+        )
+        for position, exercise in group["items"]:
+            ex_name = html_escape(str(exercise.get("exercise", "")))
+            series = html_escape(str(exercise.get("series", "—") or "—"))
+            reps = html_escape(str(exercise.get("repetitions", "—") or "—"))
+            effort = str(exercise.get("intensity", "")).strip()
+            notes = (" · " + html_escape(effort)) if effort else ""
+            weight_value, weight_source = quick_weight_text(exercise)
+            recent = quick_recent(exercise)
+            real_markup = (
+                f'<div class="quick-loading-note">{html_escape(recent)}</div>'
+                if recent else ""
+            )
+            html_parts.append(
+                '<div class="quick-row">'
+                f'<div class="quick-ex"><span class="quick-num">{position:02d}.</span> {ex_name}'
+                f'<div class="quick-note">{html_escape(str(exercise.get("pattern", "")))}{notes}</div></div>'
+                f'<div class="quick-count">{series} × {reps}</div>'
+                f'<div class="quick-load">{html_escape(weight_value)}'
+                f'<div class="quick-loading-note">{html_escape(weight_source)}</div>'
+                f'{real_markup}</div></div>'
+            )
+        html_parts.append("</section>")
+    st.markdown("".join(html_parts), unsafe_allow_html=True)
+    if summary_day == 3 and summary_week in (2, 3, 4):
+        st.caption("El Excel tiene solo dos ejercicios en el circuito abdominal del miércoles de esta semana.")
+    if HISTORY.get("_offline"):
+        st.warning("No se pudo actualizar el historial: pueden faltar los últimos pesos reales.")
+    st.caption(
+        "Pesos indicados = referencias de la planilla, NO entrenamientos realizados. "
+        "Los pesos que ya hayas guardado aparecen aparte como «Último real». "
+        "Los guiones indican que no hay una carga informada."
+    )
+
+
+with tabs[2]:
     st.markdown("### 📊 Tu evolución, en números")
     render_plan_charts(PLAN)
     st.divider()
@@ -494,7 +686,7 @@ with tabs[1]:
         )
         render_calendar(SESSIONS)
 
-with tabs[2]:
+with tabs[3]:
     st.markdown("### 📚 Registro público de sesiones")
     st.caption("Cada sesión guardada por el administrador aparece para todos.")
     if DF.empty:
@@ -526,7 +718,7 @@ with tabs[2]:
         help="Incluye los ejercicios y pesos de referencia que existían en el Excel original."
     )
 
-with tabs[3]:
+with tabs[4]:
     st.markdown("### ⚖️ Evolución del peso corporal")
     st.caption("Mediciones reales, registradas por fecha y visibles para todos.")
     if WEIGHT.get("_offline"):
@@ -534,7 +726,7 @@ with tabs[3]:
     render_weight_chart(MEASUREMENTS)
 
 
-with tabs[4]:
+with tabs[5]:
     st.markdown("### 🔐 Panel de administración")
     st.caption("La aplicación es pública. Este panel requiere tu PIN para guardar o modificar.")
 
