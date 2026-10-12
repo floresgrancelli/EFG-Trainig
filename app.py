@@ -541,8 +541,8 @@ with tabs[3]:
                     f"Objetivo: {ex['series']} series · {ex['repetitions']} repeticiones "
                     f"· {ex['intensity'] or 'sin RIR indicado'}"
                 )
+                units = st.radio("Unidad de carga", ["kg", "lb"], horizontal=True, key="register_units")
                 with st.form("register_session_form", clear_on_submit=False):
-                    units = st.radio("Unidad de carga", ["kg", "lb"], horizontal=True)
                     new_sets = []
                     for i in range(series_count):
                         oldset = (previous.get("sets", [])[i]
