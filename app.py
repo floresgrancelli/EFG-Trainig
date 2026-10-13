@@ -310,6 +310,77 @@ def weekly_report_weight(exercise: dict, unit: str = "lb") -> tuple[str, str] | 
     return label, context
 
 
+def monthly_maximum_weights(
+    plan: list[dict], sessions: list[dict], as_of: date | None = None
+) -> dict[str, dict]:
+    """Máximos de carga externa por movimiento en los últimos 30 días.
+
+    Cuando no hay cargas fechadas recientes, se conserva la referencia inicial
+    del Excel, sin adjudicarle una fecha ni crear una sesión realizada.
+    """
+    current = as_of or date.today()
+    window_start = current - timedelta(days=29)
+    recent: dict[str, dict] = {}
+    initial: dict[str, dict] = {}
+
+    def add(target, exercise, raw_kg, source):
+        name = " ".join(str(exercise).strip().casefold().split())
+        try:
+            amount = float(raw_kg)
+        except (TypeError, ValueError):
+            return
+        if not name or not math.isfinite(amount) or amount < 0 or amount > 1500:
+            return
+        if name not in target or amount > target[name]["kg"]:
+            target[name] = {"kg": amount, "source": source}
+
+    for ex in plan:
+        if int(ex.get("week", 0)) == 1:
+            series = ex.get("reference_series_kg")
+            if isinstance(series, list) and series:
+                for weight in series:
+                    add(initial, ex.get("exercise", ""), weight, "excel_inicial")
+            elif ex.get("reference_weight_kg") is not None:
+                add(initial, ex.get("exercise", ""), ex.get("reference_weight_kg"), "excel_inicial")
+
+        report = ex.get("weekly_report")
+        if not isinstance(report, dict):
+            continue
+        try:
+            logged = date.fromisoformat(str(report.get("date", "")))
+        except ValueError:
+            continue
+        if not window_start <= logged <= current:
+            continue
+        pounds = report.get("series_lb")
+        if not isinstance(pounds, list) or not pounds:
+            pounds = [report.get("lb")]
+        for weight in pounds:
+            if weight is None:
+                continue
+            try:
+                add(recent, ex.get("exercise", ""), float(weight) * 0.45359237, "seguimiento")
+            except (ValueError, TypeError):
+                continue
+
+    for session in sessions:
+        if not isinstance(session, dict):
+            continue
+        try:
+            logged = date.fromisoformat(str(session.get("date", "")))
+        except ValueError:
+            continue
+        if not window_start <= logged <= current:
+            continue
+        for series in session.get("sets", []):
+            if isinstance(series, dict):
+                add(recent, session.get("exercise", ""), series.get("kg"), "app")
+
+    result = dict(initial)
+    result.update(recent)
+    return result
+
+
 def plot_layout(fig, height=370):
     fig.update_layout(
         height=height,
@@ -364,17 +435,19 @@ def announce(kicker, title, sub):
         f'<h1>{title}</h1><div class="hero-signature">by EFG</div>'
         f'<div class="hero-sub">{sub}</div>'
         f'<div style="margin-top:18px"><span class="pill">5 DÍAS</span>'
-        f'<span class="pill">4 SEMANAS</span>'
+        f'<span class="pill">12 SEMANAS</span>'
         f'<span class="pill">FUERZA + DATOS</span></div></div>',
         unsafe_allow_html=True,
     )
 
 
 PLAN = load_plan_local()
+PLAN_WEEKS = sorted({int(row['week']) for row in PLAN})
 HISTORY = public_history()
 WEIGHT = public_weight()
 MEASUREMENTS = WEIGHT.get("measurements", [])
 SESSIONS = HISTORY.get("sessions", [])
+MONTHLY_MAX = monthly_maximum_weights(PLAN, SESSIONS)
 DF = series_rows(SESSIONS)
 TOKEN = secret("GITHUB_TOKEN")
 ADMIN_PIN = secret("ADMIN_PIN")
@@ -391,12 +464,12 @@ with tabs[0]:
     st.markdown("### ⚡ Plan de entrenamiento")
     a, b, c = st.columns(3)
     a.metric("Días de entrenamiento", "05")
-    b.metric("Semanas planificadas", "04")
+    b.metric("Semanas planificadas", f"{len(PLAN_WEEKS):02d}")
     c.metric("Ejercicios programados", len(PLAN))
     st.markdown("")
     left, right = st.columns([1, 1])
     with left:
-        week = st.selectbox("SEMANA", [1, 2, 3, 4], format_func=lambda x: f"Semana {x}")
+        week = st.selectbox("SEMANA", PLAN_WEEKS, format_func=lambda x: f"Semana {x}")
     with right:
         day = st.selectbox("DÍA", [1, 2, 3, 4, 5],
                           format_func=lambda x: f"Día {x} · {DAY_NAMES[x-1]}")
@@ -476,11 +549,11 @@ with tabs[0]:
 
 with tabs[1]:
     st.markdown("### 📋 Rutina resumen")
-    st.caption("Modo gimnasio: todos los ejercicios y sus bloques a simple vista, sin desplegar fichas.")
+    st.caption("Modo gimnasio: todos los ejercicios de un vistazo y el mayor peso disponible del último mes.")
     qw, qd, qu = st.columns([1, 1.3, .8])
     with qw:
         summary_week = st.selectbox(
-            "SEMANA", [1, 2, 3, 4], format_func=lambda v: f"Semana {v}",
+            "SEMANA", PLAN_WEEKS, format_func=lambda v: f"Semana {v}",
             key="quick_week",
         )
     with qd:
@@ -547,7 +620,7 @@ with tabs[1]:
         f'<div class="finish" style="margin:12px 0 15px;padding:16px 20px">'
         f'<div class="mini-title">VISTA RÁPIDA · ENTRENAMIENTO</div>'
         f'<h3 style="margin:3px 0 4px">SEMANA {summary_week} · {DAY_NAMES[summary_day - 1].upper()}</h3>'
-        f'<div class="muted">{len(day_exercises)} ejercicios · cargas en {summary_unit}</div></div>',
+        f'<div class="muted">{len(day_exercises)} ejercicios · máximos en {summary_unit}</div></div>',
         unsafe_allow_html=True,
     )
     st.markdown(
@@ -1210,7 +1283,7 @@ with tabs[5]:
             with edit_tabs[0]:
                 col1, col2, col3 = st.columns(3)
                 with col1:
-                    edit_week = st.selectbox("Semana del plan", [1,2,3,4],
+                    edit_week = st.selectbox("Semana del plan", PLAN_WEEKS,
                                              key="edit_week")
                 with col2:
                     edit_day = st.selectbox("Día", [1,2,3,4,5],
@@ -1314,7 +1387,7 @@ with tabs[5]:
                     "Permite corregir la planificación publicada. Guardar provoca una "
                     "actualización automática de la app; puede tardar unos minutos."
                 )
-                modify_week = st.selectbox("Semana", [1,2,3,4], key="modify_week")
+                modify_week = st.selectbox("Semana", PLAN_WEEKS, key="modify_week")
                 modify_day = st.selectbox(
                     "Día", [1,2,3,4,5], format_func=lambda x:DAY_NAMES[x-1],
                     key="modify_day",
