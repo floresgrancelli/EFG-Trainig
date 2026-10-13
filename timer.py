@@ -9,7 +9,8 @@ def render_rest_timer() -> None:
     st.markdown("### ⏱️ Temporizador de descansos")
     st.caption(
         "Elegí 3:00, 2:00 o 1:30 minutos. Funciona en la pestaña abierta; "
-        "en iPhone el aviso sonoro puede no activarse si bloqueás la pantalla."
+        "tocá «🔊 Probar sonido» la primera vez en iPhone para activarlo. "
+        "Puede no sonar con el teléfono en silencio, bloqueado o en segundo plano."
     )
     components.html(
         r"""
@@ -38,6 +39,9 @@ border-radius:100%;background:#100d20}
 .action{appearance:none;cursor:pointer;border-radius:15px;border:1px solid #594071;padding:13px 20px;
 font-weight:800;font-size:16px;min-width:132px;touch-action:manipulation;color:#f7edff;background:#332346}
 .action.primary{background:linear-gradient(100deg,#7c3aed,#c026d3);border-color:#c18bfb}
+.action.audio{border-color:#187c80;background:#173c48;color:#abf7ee}
+.audio-status{text-align:center;font-size:12px;font-weight:700;line-height:1.5;color:#b3e4de;
+margin:14px auto 0;max-width:620px}
 .action:focus-visible,.preset:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
 .note{text-align:center;color:#a99abd;font-size:12px;margin-top:16px;line-height:1.5}
 @media(max-width:480px){.wrap{padding:16px 9px}.preset{min-width:90px;padding:11px 12px}.actions{gap:7px}.action{min-width:100px;padding:12px 12px}}
@@ -60,15 +64,21 @@ font-weight:800;font-size:16px;min-width:132px;touch-action:manipulation;color:#
   <button type="button" id="start" class="action primary">▶ Iniciar</button>
   <button type="button" id="pause" class="action">Ⅱ Pausar</button>
   <button type="button" id="reset" class="action">↺ Reiniciar</button>
+  <button type="button" id="test-sound" class="action audio">🔊 Probar sonido</button>
  </div>
- <div class="note">El temporizador sigue la hora real aunque cambies de pestaña.
- Mantené la pantalla activa para oír el aviso de finalización.</div>
+ <div id="audio-status" class="audio-status" role="status" aria-live="polite">
+  Para activar el sonido en iPhone, tocá «Probar sonido» una vez.
+ </div>
+ <div class="note">Usá volumen audible y desactivá el modo silencio si no se escucha.
+ El aviso funciona con el navegador abierto; iPhone puede bloquearlo con la pantalla apagada
+ o cuando la app queda en segundo plano.</div>
 </div>
 <script>
 (function(){
   "use strict";
   var storageKey="efg-training-rest-timer-v1";
-  var selected=180, remaining=180000, deadline=0, running=false, finished=false, audio=null;
+  var selected=180, remaining=180000, deadline=0, running=false, finished=false;
+  var audio=null, alertSound=null, soundReady=false, soundUrl=null, wakeLock=null;
   var clock=document.getElementById("clock"), ring=document.getElementById("ring");
   var status=document.getElementById("status"), start=document.getElementById("start");
   var options=Array.from(document.querySelectorAll(".preset"));
@@ -89,31 +99,135 @@ font-weight:800;font-size:16px;min-width:132px;touch-action:manipulation;color:#
       selected:selected,remaining:remaining,deadline:deadline,running:running,finished:finished
     }));}catch(e){}
   }
+  function soundMessage(message){
+    document.getElementById("audio-status").textContent=message;
+  }
+  function makeSound(){
+    // Alarma WAV local (sin descarga, internet ni archivos externos).
+    // HTMLAudio suele funcionar mejor que WebAudio en Safari con modo silencio,
+    // siempre que se habilite al pulsar un botón.
+    if(alertSound)return alertSound;
+    try{
+      var rate=22050, samples=Math.ceil(rate*1.55);
+      var buffer=new ArrayBuffer(44+samples*2), view=new DataView(buffer);
+      function word(at,str){for(var j=0;j<str.length;j++)view.setUint8(at+j,str.charCodeAt(j));}
+      word(0,"RIFF");view.setUint32(4,36+samples*2,true);word(8,"WAVE");
+      word(12,"fmt ");view.setUint32(16,16,true);
+      view.setUint16(20,1,true);view.setUint16(22,1,true);
+      view.setUint32(24,rate,true);view.setUint32(28,rate*2,true);
+      view.setUint16(32,2,true);view.setUint16(34,16,true);
+      word(36,"data");view.setUint32(40,samples*2,true);
+      var tones=[[.08,.34,784],[.47,.75,988],[.88,1.28,1175]];
+      for(var i=0;i<samples;i++){
+        var sec=i/rate, val=0;
+        for(var k=0;k<tones.length;k++){
+          var tone=tones[k],a=tone[0],b=tone[1],hz=tone[2];
+          if(sec>=a&&sec<=b){
+            var envelope=Math.max(0,Math.min(1,(sec-a)/.018,(b-sec)/.065));
+            val=.36*envelope*Math.sin(2*Math.PI*hz*(sec-a));
+            break;
+          }
+        }
+        view.setInt16(44+2*i,Math.round(Math.max(-1,Math.min(1,val))*32767),true);
+      }
+      soundUrl=URL.createObjectURL(new Blob([buffer],{type:"audio/wav"}));
+      alertSound=new Audio(soundUrl);
+      alertSound.preload="auto";
+      alertSound.playsInline=true;
+      return alertSound;
+    }catch(e){return null;}
+  }
   function setupAudio(){
     try{
       if(!audio){
-        var Audio=window.AudioContext||window.webkitAudioContext;
-        if(Audio)audio=new Audio();
+        var Ctx=window.AudioContext||window.webkitAudioContext;
+        if(Ctx)audio=new Ctx();
       }
-      if(audio && audio.state==="suspended")audio.resume();
+      if(audio&&audio.state==="suspended"){
+        var resumed=audio.resume();
+        if(resumed&&resumed.catch)resumed.catch(function(){});
+      }
     }catch(e){}
   }
-  function chime(){
+  function synthFallback(){
     try{
-      if(!audio)return;
-      setupAudio();
-      var t=audio.currentTime;
-      [0,.21,.42].forEach(function(delay){
-        var osc=audio.createOscillator(), gain=audio.createGain();
-        osc.type="sine";osc.frequency.value=880;
-        gain.gain.setValueAtTime(0.001,t+delay);
-        gain.gain.exponentialRampToValueAtTime(0.2,t+delay+.02);
-        gain.gain.exponentialRampToValueAtTime(.001,t+delay+.17);
+      if(!audio||audio.state!=="running")return false;
+      var t=audio.currentTime+.02;
+      [[0,784],[.36,988],[.72,1175]].forEach(function(note){
+        var osc=audio.createOscillator(),gain=audio.createGain();
+        osc.type="sine";osc.frequency.value=note[1];
+        gain.gain.setValueAtTime(.001,t+note[0]);
+        gain.gain.exponentialRampToValueAtTime(.25,t+note[0]+.025);
+        gain.gain.exponentialRampToValueAtTime(.001,t+note[0]+.26);
         osc.connect(gain);gain.connect(audio.destination);
-        osc.start(t+delay);osc.stop(t+delay+.18);
+        osc.start(t+note[0]);osc.stop(t+note[0]+.27);
       });
-    }catch(e){}
+      return true;
+    }catch(e){return false;}
+  }
+  function armSound(){
+    setupAudio();
+    var sound=makeSound();
+    if(!sound||soundReady)return;
+    try{
+      // Primera reproducción iniciada directamente por el botón «Iniciar».
+      // El clip comienza con 80 ms de silencio; lo pausamos antes del pitido.
+      // El mismo elemento queda habilitado para reproducirse al llegar a cero.
+      var attempt=sound.play();
+      if(attempt&&typeof attempt.then==="function"){
+        attempt.then(function(){
+          sound.pause();sound.currentTime=0;soundReady=true;
+          soundMessage("🔊 Aviso preparado. Podés comprobarlo con «Probar sonido».");
+        }).catch(function(){
+          soundMessage("Tocá «🔊 Probar sonido» para habilitar el audio del iPhone.");
+        });
+      }
+    }catch(e){
+      soundMessage("Tocá «🔊 Probar sonido» para habilitar el audio del iPhone.");
+    }
+  }
+  function chime(fromTest){
+    if(!fromTest && !finished)return;
+    var sound=makeSound();
+    function fallback(){
+      var ok=synthFallback();
+      soundMessage(ok?"Aviso emitido. Si no sonó, revisá silencio y volumen.":"El navegador bloqueó el audio. Tocá «Probar sonido» con la pantalla activa.");
+    }
+    if(sound){
+      try{
+        sound.pause();sound.currentTime=0;
+        var playPromise=sound.play();
+        if(playPromise&&typeof playPromise.then==="function"){
+          playPromise.then(function(){
+            soundReady=true;
+            soundMessage(fromTest?"🔊 Prueba reproducida. Sonido preparado.":"🔔 ¡Descanso terminado! Sonó el aviso.");
+          }).catch(fallback);
+        }else{
+          soundReady=true;
+          soundMessage(fromTest?"🔊 Prueba de sonido iniciada.":"🔔 ¡Descanso terminado!");
+        }
+      }catch(e){fallback();}
+    }else fallback();
     try{if(navigator.vibrate)navigator.vibrate([180,100,180]);}catch(e){}
+  }
+  function keepAwake(){
+    try{
+      if(navigator.wakeLock&&!wakeLock&&document.visibilityState==="visible"){
+        navigator.wakeLock.request("screen").then(function(lock){
+          wakeLock=lock;
+          lock.addEventListener("release",function(){wakeLock=null;});
+        }).catch(function(){});
+      }
+    }catch(e){}
+  }
+  function allowSleep(){
+    if(wakeLock){
+      try{wakeLock.release().catch(function(){});}catch(e){}
+      wakeLock=null;
+    }
+  }
+  function stopChime(){
+    try{if(alertSound){alertSound.pause();alertSound.currentTime=0;}}catch(e){}
   }
   function display(){
     var secs=Math.ceil(remaining/1000);
@@ -135,7 +249,7 @@ font-weight:800;font-size:16px;min-width:132px;touch-action:manipulation;color:#
   function tick(){
     if(running){
       remaining=Math.max(0,deadline-Date.now());
-      if(remaining===0){running=false;finished=true;save();chime();}
+      if(remaining===0){running=false;finished=true;save();allowSleep();chime(false);}
     }
     display();
   }
@@ -145,28 +259,41 @@ font-weight:800;font-size:16px;min-width:132px;touch-action:manipulation;color:#
     button.addEventListener("click",function(){
       selected=Number(button.dataset.seconds);
       remaining=selected*1000;deadline=0;running=false;finished=false;
-      save();display();
+      stopChime();allowSleep();save();display();
     });
   });
   start.addEventListener("click",function(){
-    setupAudio();
+    armSound();
+    stopChime();
     if(remaining===0){remaining=selected*1000;}
     deadline=Date.now()+remaining;running=true;finished=false;
+    keepAwake();
     save();display();
   });
   document.getElementById("pause").addEventListener("click",function(){
-    if(running){remaining=Math.max(0,deadline-Date.now());running=false;finished=false;save();}
+    if(running){remaining=Math.max(0,deadline-Date.now());running=false;finished=false;allowSleep();save();}
     display();
   });
   document.getElementById("reset").addEventListener("click",function(){
-    running=false;finished=false;deadline=0;remaining=selected*1000;save();display();
+    running=false;finished=false;deadline=0;remaining=selected*1000;
+    stopChime();allowSleep();save();display();
+  });
+  document.getElementById("test-sound").addEventListener("click",function(){
+    setupAudio();
+    soundMessage("Reproduciendo prueba de sonido…");
+    chime(true);
+  });
+  document.addEventListener("visibilitychange",function(){
+    tick();
+    if(running&&document.visibilityState==="visible")keepAwake();
   });
   tick();
+  if(running)keepAwake();
   setInterval(tick,200);
 })();
 </script>
 </body>
 </html>""",
-        height=470,
+        height=550,
         scrolling=False,
     )
