@@ -54,6 +54,14 @@ Con el PIN correcto, la pestaña **ADMIN** permite:
 
 Cada modificación se registra como commit. El público puede consultar la rutina y el historial, pero no puede escribir sin el token privado. Los gráficos de sesiones reales se generan con sesiones **reales**, sin convertir referencias del Excel en entrenamientos inventados.
 
+## Evolución por repeticiones a igual carga
+
+- En **PROGRESO**, seleccioná un ejercicio y una carga fija: el gráfico muestra la serie con mayor número de repeticiones registrada **en cada fecha con esa carga**.
+- La comparación incluye la última mejor serie y el cambio de repeticiones respecto del primer registro a la misma carga.
+- En **HISTORIAL**, el selector de indicadores ahora incluye **Repeticiones a igual carga**, además de carga máxima, volumen y repeticiones totales.
+- Se muestran únicamente registros reales: **no** se suman repeticiones entre series distintas para declarar una mejora.
+- Tené en cuenta el RIR y la técnica al comparar rendimiento; no se calcula una estimación de fuerza máxima.
+
 ## Máximo móvil en la rutina resumida
 
 - La solapa **Rutina resumen** permite elegir las 12 semanas, de lunes a viernes, y ver pesos en kg/lb.
