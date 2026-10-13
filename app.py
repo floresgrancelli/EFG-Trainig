@@ -728,6 +728,52 @@ with tabs[2]:
         ))
         fig.update_layout(yaxis_title="Carga máxima registrada (kg)")
         st.plotly_chart(plot_layout(fig), use_container_width=True, config={"displayModeBar":False})
+        st.markdown("#### 🔁 Más repeticiones con el mismo peso")
+        st.caption(
+            "Compará tu mejor serie por fecha manteniendo la misma carga. "
+            "Así se ve el progreso por repeticiones aunque los kilos no cambien."
+        )
+        available_loads = sorted(filtered["Carga (kg)"].unique().tolist(), reverse=True)
+        load_frequency = filtered.groupby("Carga (kg)")["Fecha"].nunique()
+        default_load = max(available_loads, key=lambda load: (int(load_frequency[load]), load))
+        chosen_load = st.selectbox(
+            "Carga para comparar",
+            available_loads,
+            index=available_loads.index(default_load),
+            format_func=lambda load: f"{fmt(load, 2).removesuffix(',00')} kg",
+            key="stats_repetition_load",
+        )
+        same_load_reps = (
+            filtered[filtered["Carga (kg)"] == chosen_load]
+            .groupby("Fecha", as_index=False)["Repeticiones"].max()
+            .sort_values("Fecha")
+        )
+        first_reps = int(same_load_reps.iloc[0]["Repeticiones"])
+        last_reps = int(same_load_reps.iloc[-1]["Repeticiones"])
+        rep_a, rep_b = st.columns(2)
+        rep_a.metric("Última mejor serie", f"{last_reps} rep")
+        rep_b.metric(
+            "Cambio desde el primer registro",
+            f"{last_reps - first_reps:+d} rep" if len(same_load_reps) >= 2 else "—",
+        )
+        reps_fig = go.Figure(go.Scatter(
+            x=same_load_reps["Fecha"], y=same_load_reps["Repeticiones"],
+            mode="lines+markers+text",
+            line=dict(color=CYAN, width=4),
+            marker=dict(size=12, color=PURPLE, line=dict(color="#FFFFFF", width=2)),
+            text=[str(int(n)) for n in same_load_reps["Repeticiones"]],
+            textposition="top center",
+            hovertemplate="%{x}<br>%{y:.0f} repeticiones<extra></extra>",
+        ))
+        reps_fig.update_layout(yaxis_title="Mejor serie (repeticiones)", xaxis_title="Fecha")
+        st.plotly_chart(
+            plot_layout(reps_fig), use_container_width=True,
+            config={"displayModeBar": False},
+        )
+        st.caption(
+            "Se toma la serie con más repeticiones de cada fecha a la carga elegida, "
+            "no la suma de todas las series. Interpretá las mejoras junto con la técnica y el RIR."
+        )
         st.markdown("#### Resumen semanal")
         show = by_week.rename(columns={
             "Semana calendario":"Semana (lunes)", "Volumen":"Volumen (kg·rep)"
@@ -955,6 +1001,7 @@ with tabs[3]:
 
         # Resumir únicamente cargas reales, con fecha, para el movimiento elegido.
         dated = {}
+        reps_by_load = {}
         for session in SESSIONS:
             if not isinstance(session, dict):
                 continue
@@ -977,6 +1024,10 @@ with tabs[3]:
                     valid_sets.append((load, reps))
             if not valid_sets:
                 continue
+            for load, reps in valid_sets:
+                load_key = round(load, 3)
+                date_reps = reps_by_load.setdefault(load_key, {})
+                date_reps[real_date] = max(date_reps.get(real_date, 0), reps)
             if real_date not in dated:
                 dated[real_date] = {"max_kg": 0.0, "volume": 0.0, "reps": 0, "sets": 0}
             dated[real_date]["max_kg"] = max(
@@ -1059,16 +1110,29 @@ with tabs[3]:
             st.markdown("##### Entrenamientos registrados en EFG Training")
             selected_metric = st.radio(
                 "Indicador del gráfico",
-                ["Carga máxima", "Volumen", "Repeticiones"],
+                ["Carga máxima", "Volumen", "Repeticiones", "Repeticiones a igual carga"],
                 horizontal=True, key="history_chart_metric",
             )
-            metric_key = {
-                "Carga máxima": "max_kg",
-                "Volumen": "volume",
-                "Repeticiones": "reps",
-            }[selected_metric]
-            x_dates = history_dates
-            y_values = [dated[d][metric_key] for d in x_dates]
+            if selected_metric == "Repeticiones a igual carga":
+                loads = sorted(reps_by_load, reverse=True)
+                default_load = max(loads, key=lambda load: (len(reps_by_load[load]), load))
+                fixed_load = st.selectbox(
+                    "Comparar con carga fija",
+                    loads,
+                    index=loads.index(default_load),
+                    format_func=lambda load: f"{fmt(load, 2).removesuffix(',00')} kg",
+                    key="history_repetition_load",
+                )
+                x_dates = sorted(reps_by_load[fixed_load])
+                y_values = [reps_by_load[fixed_load][d] for d in x_dates]
+            else:
+                metric_key = {
+                    "Carga máxima": "max_kg",
+                    "Volumen": "volume",
+                    "Repeticiones": "reps",
+                }[selected_metric]
+                x_dates = history_dates
+                y_values = [dated[d][metric_key] for d in x_dates]
             chart = go.Figure()
             if selected_metric == "Volumen":
                 chart.add_trace(go.Bar(
@@ -1082,7 +1146,7 @@ with tabs[3]:
                     marker=dict(size=11, color=PURPLE, line=dict(color="#FFFFFF", width=1)),
                     hovertemplate=(
                         "%{x|%d/%m/%Y}<br>%{y:.2f} kg<extra></extra>"
-                        if metric_key == "max_kg" else
+                        if selected_metric == "Carga máxima" else
                         "%{x|%d/%m/%Y}<br>%{y:.0f} repeticiones<extra></extra>"
                     ),
                 ))
@@ -1098,6 +1162,7 @@ with tabs[3]:
                     "Carga máxima": "Carga máxima por sesión (kg)",
                     "Volumen": "kg × repeticiones",
                     "Repeticiones": "Repeticiones totales",
+                    "Repeticiones a igual carga": "Mejor serie a carga fija (repeticiones)",
                 }[selected_metric],
                 xaxis=dict(type="date", tickformat="%d/%m/%y"),
                 margin=dict(l=10, r=20, t=45, b=35),
@@ -1106,6 +1171,12 @@ with tabs[3]:
                 plot_layout(chart, 365), use_container_width=True,
                 config={"displayModeBar": False},
             )
+            if selected_metric == "Repeticiones a igual carga":
+                st.caption(
+                    f"Cada punto muestra la serie con más repeticiones realizada con "
+                    f"{fmt(fixed_load, 2).removesuffix(',00')} kg en esa fecha. "
+                    "No suma repeticiones de series diferentes."
+                )
             detail_rows = [
                 {
                     "Fecha": day_record,
