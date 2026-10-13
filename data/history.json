@@ -336,10 +336,10 @@
       "load_scope": "por lado + barra (peso de barra no informado)",
       "reported_sets": 4,
       "record_status": "repeticiones_confirmadas_carga_total_incompleta",
-      "rir": null,
-      "notes": "Después de cada serie hice 10 sentadillas profundas sin peso",
+      "rir": 2,
+      "notes": "Luego de cada serie hago 10 sentadillas profundas sin peso",
       "source": "Resumen de entrenamiento enviado en capturas 13/10/2026",
-      "saved_at": "2026-10-13T22:39:08.544397+00:00"
+      "saved_at": "2026-10-13T23:20:55.394265+00:00"
     }
   ]
 }
