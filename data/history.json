@@ -148,47 +148,6 @@
       "source": "Resumen de entrenamiento enviado en capturas 13/10/2026"
     },
     {
-      "id": "2026-10-13|s4-d2-f28",
-      "date": "2026-10-13",
-      "week": 4,
-      "day": 2,
-      "exercise_id": "s4-d2-f28",
-      "exercise": "Aductores",
-      "sets": [
-        {
-          "kg": 68.039,
-          "reps": 12,
-          "load_lb": 150,
-          "load_scope": "máquina"
-        },
-        {
-          "kg": 68.039,
-          "reps": 12,
-          "load_lb": 150,
-          "load_scope": "máquina"
-        },
-        {
-          "kg": 68.039,
-          "reps": 12,
-          "load_lb": 150,
-          "load_scope": "máquina"
-        },
-        {
-          "kg": 68.039,
-          "reps": 12,
-          "load_lb": 150,
-          "load_scope": "máquina"
-        }
-      ],
-      "reported_load_lb": 150,
-      "load_scope": "máquina",
-      "reported_sets": 4,
-      "record_status": "confirmado",
-      "rir": null,
-      "notes": "4×12 a 150 lb, según resumen del entrenamiento. Asociado al bloque con extensión de cuádriceps.",
-      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026"
-    },
-    {
       "id": "2026-10-13|s4-d2-f29",
       "date": "2026-10-13",
       "week": 4,
@@ -342,6 +301,44 @@
       "notes": "",
       "source": "Resumen de entrenamiento enviado en capturas 13/10/2026",
       "saved_at": "2026-10-13T23:23:50.832558+00:00"
+    },
+    {
+      "id": "2026-10-13|s4-d2-f28",
+      "date": "2026-10-13",
+      "week": 4,
+      "day": 2,
+      "exercise_id": "s4-d2-f28",
+      "exercise": "Aductores",
+      "sets": [
+        {
+          "kg": null,
+          "reps": 12,
+          "load_scope": "máquina"
+        },
+        {
+          "kg": null,
+          "reps": 12,
+          "load_scope": "máquina"
+        },
+        {
+          "kg": null,
+          "reps": 12,
+          "load_scope": "máquina"
+        },
+        {
+          "kg": null,
+          "reps": 12,
+          "load_scope": "máquina"
+        }
+      ],
+      "reported_load_lb": 150,
+      "load_scope": "máquina",
+      "reported_sets": 4,
+      "record_status": "confirmado",
+      "rir": 2,
+      "notes": "",
+      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026",
+      "saved_at": "2026-10-13T23:27:18.588292+00:00"
     }
   ]
 }
