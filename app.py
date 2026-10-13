@@ -717,8 +717,8 @@ with tabs[2]:
 with tabs[3]:
     st.markdown("### 📚 Historial y evolución de fuerza")
     st.caption(
-        "Dos fuentes claramente separadas: máximos del último mes importados del Excel "
-        "y entrenamientos reales guardados desde EFG Training."
+        "Tres fuentes diferenciadas: planilla inicial (semana 1), seguimiento "
+        "conversado por semana y sesiones guardadas desde EFG Training."
     )
 
     # Estos pesos son máximos históricos informados por Edu, no sesiones fechadas.
@@ -759,10 +759,11 @@ with tabs[3]:
             "per_set": valid_sequence,
         })
 
-    st.markdown("#### 📌 Máximos utilizados el mes anterior")
+    st.markdown("#### 📌 Referencias iniciales del Excel · Semana 1")
     st.caption(
-        "Proceden del Excel original. No tienen fecha individual y NO cuentan como "
-        "entrenamientos realizados en la aplicación."
+        "Las cargas de la planilla original se muestran aquí como punto de partida. "
+        "Los valores documentados de las semanas siguientes aparecen en el seguimiento "
+        "semanal, sin sustituir ni inventar sesiones de la aplicación."
     )
     historical_by_exercise = {}
     for item in historic:
@@ -803,7 +804,7 @@ with tabs[3]:
             hide_index=True, height=340,
         )
         st.download_button(
-            "⬇️ Descargar máximos del mes anterior (CSV)",
+            "⬇️ Descargar referencia original del Excel (CSV)",
             pd.DataFrame(ref_table).to_csv(index=False).encode("utf-8-sig"),
             "efg_training_maximos_mes_anterior.csv", "text/csv",
         )
@@ -847,6 +848,57 @@ with tabs[3]:
             )
 
     st.divider()
+    st.markdown("#### 🗓️ Pesos reportados por semana")
+    week_reports = []
+    for item in PLAN:
+        detail = item.get("weekly_report")
+        if not isinstance(detail, dict):
+            continue
+        values = detail.get("series_lb")
+        if not isinstance(values, list) or not values:
+            values = [detail.get("lb")]
+        try:
+            values = [float(number) for number in values]
+            if not values or any(not math.isfinite(v) or v < 0 for v in values):
+                continue
+        except (TypeError, ValueError):
+            continue
+        week_reports.append({
+            "exercise": str(item.get("exercise", "")).strip(),
+            "week": int(item["week"]),
+            "date": str(detail.get("date", "")),
+            "lb": max(values),
+            "scope": str(detail.get("scope", "")),
+            "series_lb": values,
+        })
+    st.caption(
+        "Cargas comunicadas en «Evaluación y plan fitness», asociadas a su semana. "
+        "Se respeta «por lado», «por mancuerna» o «máquina»: no son cargas totales "
+        "ni necesariamente máximos de una repetición."
+    )
+    if week_reports:
+        with st.expander(
+            f"Consultar todos los registros recuperados ({len(week_reports)})",
+            expanded=False,
+        ):
+            st.dataframe(
+                pd.DataFrame([
+                    {
+                        "Semana": item["week"],
+                        "Fecha": item["date"],
+                        "Ejercicio": item["exercise"],
+                        "Carga (lb)": round(item["lb"], 1),
+                        "Referencia de carga": item["scope"],
+                        "Por serie (lb)": (
+                            " / ".join(fmt(v, 1) for v in item["series_lb"])
+                            if len(item["series_lb"]) > 1 else "—"
+                        ),
+                    } for item in week_reports
+                ]).sort_values(["Semana", "Fecha", "Ejercicio"]),
+                use_container_width=True, hide_index=True, height=350,
+            )
+
+    st.divider()
     st.markdown("#### 📈 Gráfico de evolución por ejercicio")
     st.caption(
         "Elegí un ejercicio para ver su propio gráfico. La línea utiliza las fechas reales "
@@ -870,6 +922,10 @@ with tabs[3]:
         )
         chosen_key = chosen_name.casefold()
         baseline = historical_by_exercise.get(chosen_key)
+        weekly_points = sorted(
+            [r for r in week_reports if r["exercise"].casefold() == chosen_key],
+            key=lambda record: (record["week"], record["date"]),
+        )
 
         # Resumir únicamente cargas reales, con fecha, para el movimiento elegido.
         dated = {}
@@ -906,22 +962,71 @@ with tabs[3]:
 
         history_dates = sorted(dated)
         last_real = dated[history_dates[-1]]["max_kg"] if history_dates else None
+        earliest = weekly_points[0] if weekly_points else None
+        latest = weekly_points[-1] if weekly_points else None
+        comparable = (
+            len(weekly_points) >= 2
+            and earliest["scope"] == latest["scope"]
+        )
         m1, m2, m3 = st.columns(3)
         m1.metric(
-            "Máximo mes anterior",
-            f"{fmt(baseline, 1)} kg" if baseline is not None else "—",
+            "Última carga reportada",
+            f"{fmt(latest['lb'], 1)} lb" if latest is not None else "—",
         )
         m2.metric(
-            "Última carga real",
+            "Última carga registrada en app",
             f"{fmt(last_real, 1)} kg" if last_real is not None else "—",
         )
         m3.metric(
-            "Diferencia respecto al mes anterior",
-            f"{last_real - baseline:+.1f} kg"
-            if last_real is not None and baseline is not None else "—",
+            "Cambio entre reportes",
+            f"{latest['lb'] - earliest['lb']:+.1f} lb"
+            if comparable else "—",
         )
 
+        if weekly_points:
+            st.markdown("##### 📈 Evolución semanal reportada")
+            weekly_values = {
+                int(item["week"]): float(item["lb"]) for item in weekly_points
+            }
+            weekly_labels = {
+                int(item["week"]): item["scope"] for item in weekly_points
+            }
+            x_axis = ["Semana 1", "Semana 2", "Semana 3", "Semana 4"]
+            y_axis = [weekly_values.get(i) for i in range(1, 5)]
+            weekly_chart = go.Figure()
+            weekly_chart.add_trace(go.Scatter(
+                x=x_axis, y=y_axis, mode="lines+markers+text",
+                line=dict(color=CYAN, width=4),
+                marker=dict(size=12, color=PINK, line=dict(color="#FFFFFF", width=1)),
+                text=[
+                    f"{fmt(v, 1)} lb" if v is not None else ""
+                    for v in y_axis
+                ],
+                textposition="top center",
+                connectgaps=False,
+                hovertemplate="%{x}<br>%{y:.1f} lb<extra>Seguimiento conversado</extra>",
+            ))
+            weekly_chart.update_layout(
+                yaxis_title="Carga reportada (lb, con su condición de uso)",
+                xaxis=dict(type="category"),
+                margin=dict(l=10, r=20, t=45, b=35),
+            )
+            st.plotly_chart(
+                plot_layout(weekly_chart, 350), use_container_width=True,
+                config={"displayModeBar": False},
+            )
+            qualifiers = sorted(set(weekly_labels.values()))
+            st.caption(
+                "Unidad según registro: " + ", ".join(qualifiers) + ". "
+                "Los puntos son los pesos reportados para cada semana; los huecos "
+                "significan que no hay carga confirmada. "
+                "No se sumó el peso de una barra cuando solo se informó «por lado»."
+            )
+        elif baseline is not None:
+            st.caption("Solo tenemos la referencia inicial del Excel para este ejercicio.")
+
         if history_dates:
+            st.markdown("##### Entrenamientos registrados en EFG Training")
             selected_metric = st.radio(
                 "Indicador del gráfico",
                 ["Carga máxima", "Volumen", "Repeticiones"],
@@ -954,7 +1059,7 @@ with tabs[3]:
             if selected_metric == "Carga máxima" and baseline is not None:
                 chart.add_hline(
                     y=baseline, line_color=CYAN, line_width=2,
-                    line_dash="dash", annotation_text="Máximo mes anterior (sin fecha)",
+                    line_dash="dash", annotation_text="Base Excel S1 (sin fecha)",
                     annotation_position="top left",
                     annotation_font_color=CYAN,
                 )
@@ -989,10 +1094,16 @@ with tabs[3]:
                 "El máximo es la carga externa mayor de esa sesión, no una estimación de 1RM. "
                 "Volumen = kg × repeticiones; compará el mismo movimiento y equipamiento."
             )
+        elif weekly_points:
+            st.info(
+                "Este gráfico muestra los pesos conversados por semana. "
+                "Las sesiones con fechas y estadísticas de volumen aparecerán cuando "
+                "registres entrenamientos desde ADMIN."
+            )
         elif baseline is not None:
-            # El Excel tiene referencias sin fechas. Representamos una barra, NO una tendencia falsa.
+            # El Excel trae referencias sin fechas; representamos una barra, no una tendencia falsa.
             figure = go.Figure(go.Bar(
-                x=["Mes anterior · Excel (sin fecha exacta)"], y=[baseline],
+                x=["Base Excel · semana 1 (sin fecha exacta)"], y=[baseline],
                 marker_color=CYAN,
                 text=[fmt(baseline, 1) + " kg"], textposition="outside",
                 hovertemplate="Referencia histórica: %{y:.2f} kg<extra></extra>",
@@ -1003,8 +1114,9 @@ with tabs[3]:
                 config={"displayModeBar": False},
             )
             st.info(
-                "Este ejercicio ya tiene su punto de referencia histórico. "
-                "La evolución con fechas se dibujará al guardar el primer entrenamiento desde ADMIN."
+                "Para este ejercicio solo tenemos una referencia inicial del Excel. "
+                "La evolución semanal aparecerá al sumar cargas reportadas o "
+                "sesiones guardadas desde ADMIN."
             )
         else:
             st.info(
