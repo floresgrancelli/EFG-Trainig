@@ -148,35 +148,6 @@
       "source": "Resumen de entrenamiento enviado en capturas 13/10/2026"
     },
     {
-      "id": "2026-10-13|s4-d2-f26",
-      "date": "2026-10-13",
-      "week": 4,
-      "day": 2,
-      "exercise_id": "s4-d2-f26",
-      "exercise": "Estocadas hacia atras con mancuernas",
-      "sets": [
-        {
-          "kg": null,
-          "reps": 8
-        },
-        {
-          "kg": null,
-          "reps": 8
-        },
-        {
-          "kg": null,
-          "reps": 8
-        }
-      ],
-      "reported_load_lb": 50,
-      "load_scope": "50 lb informadas, sin aclarar si carga total o por mancuerna",
-      "reported_sets": 3,
-      "record_status": "repeticiones_confirmadas_alcance_carga_incierto",
-      "rir": null,
-      "notes": "Estocadas inversas, superserie luego de hip thrust, 3 vueltas. La captura informa 50 lb, no precisa si es por mancuerna o total; evitar calcular volumen hasta aclararlo.",
-      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026"
-    },
-    {
       "id": "2026-10-13|s4-d2-f27",
       "date": "2026-10-13",
       "week": 4,
@@ -341,6 +312,36 @@
         "source": "progreso destacado en resumen"
       },
       "saved_at": "2026-10-13T23:21:53.887925+00:00"
+    },
+    {
+      "id": "2026-10-13|s4-d2-f26",
+      "date": "2026-10-13",
+      "week": 4,
+      "day": 2,
+      "exercise_id": "s4-d2-f26",
+      "exercise": "Estocadas hacia atras con mancuernas",
+      "sets": [
+        {
+          "kg": null,
+          "reps": 8
+        },
+        {
+          "kg": null,
+          "reps": 8
+        },
+        {
+          "kg": null,
+          "reps": 8
+        }
+      ],
+      "reported_load_lb": 50,
+      "load_scope": "50 lb informadas, sin aclarar si carga total o por mancuerna",
+      "reported_sets": 3,
+      "record_status": "repeticiones_confirmadas_alcance_carga_incierto",
+      "rir": 2,
+      "notes": "",
+      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026",
+      "saved_at": "2026-10-13T23:22:33.792471+00:00"
     }
   ]
 }
