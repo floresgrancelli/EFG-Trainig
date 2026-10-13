@@ -1433,29 +1433,65 @@ with tabs[7]:
                 with st.form("register_session_form", clear_on_submit=False):
                     new_sets = []
                     for i in range(series_count):
-                        oldset = (previous.get("sets", [])[i]
-                                  if previous and i < len(previous.get("sets", []))
+                        prior_sets = previous.get("sets") if previous else None
+                        oldset = (prior_sets[i] if isinstance(prior_sets, list)
+                                  and i < len(prior_sets) and isinstance(prior_sets[i], dict)
                                   else None)
-                        weight = float(oldset.get("kg",0)) if oldset else 0.0
+                        # Una carga total desconocida se almacena como None,
+                        # no como cero. Ej.: peso por lado conocido, barra sin pesar.
+                        raw_kg = oldset.get("kg") if oldset else None
+                        try:
+                            stored_kg = float(raw_kg) if raw_kg is not None else None
+                            if stored_kg is not None and (
+                                not math.isfinite(stored_kg) or stored_kg < 0
+                            ):
+                                stored_kg = None
+                        except (TypeError, ValueError):
+                            stored_kg = None
+                        weight = stored_kg if stored_kg is not None else 0.0
                         if units == "lb":
                             weight /= 0.45359237
+                        try:
+                            old_reps = int(oldset.get("reps")) if oldset else reps_plan[i]
+                        except (TypeError, ValueError):
+                            old_reps = reps_plan[i]
                         a, b, c = st.columns([.5,1.35,1.35])
                         a.markdown(f"**S{i+1}**")
                         with b:
+                            missing_load = st.checkbox(
+                                f"Carga total pendiente · S{i+1}",
+                                value=oldset is not None and stored_kg is None,
+                                key=f"pending_{ex['id']}_{edit_date.isoformat()}_{i}",
+                                help="Usá esta opción cuando se conocen las repeticiones "
+                                     "pero no el peso total. No se guarda un cero ficticio.",
+                            )
                             loaded = st.number_input(
                                 f"Carga ({units}) · S{i+1}", 0.0, 1500.0,
-                                value=round(weight,2), step=2.5, key=f"weight_{ex['id']}_{edit_date.isoformat()}_{units}_{i}",
+                                value=round(weight,2), step=2.5,
+                                disabled=missing_load,
+                                key=f"weight_{ex['id']}_{edit_date.isoformat()}_{units}_{i}",
                             )
                         with c:
                             rep = st.number_input(
                                 f"Reps · S{i+1}", 0, 10000,
-                                value=int(oldset.get("reps",0)) if oldset else reps_plan[i],
+                                value=max(0, min(10000, old_reps)),
                                 step=1, key=f"reps_{ex['id']}_{edit_date.isoformat()}_{i}",
                             )
-                        new_sets.append({
-                            "kg":round(loaded * (0.45359237 if units=="lb" else 1.0), 3),
-                            "reps":int(rep),
-                        })
+                        # Mantener metadatos de registros ya cargados
+                        # (alcance de carga, fuente y notas de cada serie).
+                        row = dict(oldset) if oldset else {}
+                        row["kg"] = (
+                            None if missing_load else
+                            round(loaded * (0.45359237 if units=="lb" else 1.0), 3)
+                        )
+                        row["reps"] = int(rep)
+                        if missing_load:
+                            row.pop("load_lb", None)
+                        elif "load_lb" in row:
+                            row["load_lb"] = round(
+                                loaded if units == "lb" else loaded / 0.45359237, 2
+                            )
+                        new_sets.append(row)
                     effort = st.selectbox(
                         "RIR real (opcional)", ["No registrado",0,1,2,3,4,5],
                         index=0, key="register_rir",
@@ -1478,7 +1514,12 @@ with tabs[7]:
                             latest, _ = fetch_remote("data/history.json", TOKEN)
                             other = [s for s in latest.get("sessions", [])
                                      if s.get("id") != ident]
-                            other.append({
+                            # Conservar el contexto original de cargas parciales:
+                            # lb por lado, barra de peso desconocido y procedencia.
+                            existing = next((s for s in latest.get("sessions", [])
+                                             if s.get("id") == ident), None)
+                            updated = dict(existing) if isinstance(existing, dict) else {}
+                            updated.update({
                                 "id":ident,
                                 "date":edit_date.isoformat(),
                                 "week":edit_week,
@@ -1490,6 +1531,7 @@ with tabs[7]:
                                 "notes":note[:900],
                                 "saved_at":datetime.now(timezone.utc).isoformat(),
                             })
+                            other.append(updated)
                             persist_remote(
                                 "data/history.json",
                                 {"schema_version":1,"sessions":other},
