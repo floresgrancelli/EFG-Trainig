@@ -462,10 +462,9 @@ tabs = st.tabs(["⚡ MI RUTINA", "📋 RUTINA RESUMEN", "📊 PROGRESO", "📚 H
 
 with tabs[0]:
     st.markdown("### ⚡ Plan de entrenamiento")
-    a, b, c = st.columns(3)
+    a, b = st.columns(2)
     a.metric("Días de entrenamiento", "05")
     b.metric("Semanas planificadas", f"{len(PLAN_WEEKS):02d}")
-    c.metric("Ejercicios programados", len(PLAN))
     st.markdown("")
     left, right = st.columns([1, 1])
     with left:
