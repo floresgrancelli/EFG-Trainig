@@ -488,7 +488,7 @@ with tabs[0]:
         '<span class="efg-legend-item efg-legend-uni">OSCURO · Individual</span>'
         '</div>', unsafe_allow_html=True,
     )
-    if day == 3 and week in (2, 3, 4):
+    if day == 3 and ((week - 1) % 4) + 1 in (2, 3, 4):
         st.caption(
             "Nota del Excel: en esta semana, el circuito abdominal del miércoles "
             "solo tiene dos ejercicios; no figura el tercero."
@@ -541,10 +541,10 @@ with tabs[0]:
     
     st.markdown("")
     st.caption(
-        "Las cargas reportadas en el seguimiento se muestran en su semana correspondiente. "
-        "El Excel original se conserva como referencia inicial; no se copian automáticamente "
-        "pesos de semana 1 a las semanas siguientes. Los reportes históricos no son "
-        "sesiones nuevas registradas en la app."
+        "Plan ampliado a 12 semanas con tres ciclos de cuatro semanas. "
+        "Las cargas reportadas en el seguimiento se conservan en su semana original "
+        "y el resumen muestra un máximo móvil de 30 días, no una meta impuesta. "
+        "Las futuras semanas no tienen progresiones de peso inventadas."
     )
 
 with tabs[1]:
@@ -567,54 +567,14 @@ with tabs[1]:
         x for x in PLAN
         if int(x["week"]) == summary_week and int(x["day"]) == summary_day
     ]
-    last_by_exercise = {}
-    for record in SESSIONS:
-        if not isinstance(record, dict):
-            continue
-        exercise_id = str(record.get("exercise_id", ""))
-        last_key = str(record.get("date", ""))
-        if exercise_id and (
-            exercise_id not in last_by_exercise
-            or last_key > str(last_by_exercise[exercise_id].get("date", ""))
-        ):
-            last_by_exercise[exercise_id] = record
-
     def quick_weight_text(exercise):
-        weekly = weekly_report_weight(exercise, summary_unit)
-        if weekly:
-            return weekly
-        # El Excel trae cargas iniciales en semana 1. No extenderlas a otras semanas.
-        if summary_week != 1:
-            return "—", "Sin carga confirmada para esta semana"
-        ref = exercise
-        scale = 1 if summary_unit == "kg" else 1 / 0.45359237
-        sequence = ref.get("reference_series_kg")
-        if isinstance(sequence, list) and sequence:
-            amounts = [fmt(float(value) * scale, 1) for value in sequence]
-            return " / ".join(amounts) + " " + summary_unit, "Base Excel · semana 1 (sin fecha)"
-        amount = ref.get("reference_weight_kg")
-        if amount is None:
-            return "—", "Sin carga confirmada para esta semana"
-        return fmt(float(amount) * scale, 1) + " " + summary_unit, "Base Excel · semana 1 (sin fecha)"
-
-    def quick_recent(exercise):
-        record = last_by_exercise.get(exercise["id"])
-        if not record:
-            return ""
-        values = []
-        scale = 1 if summary_unit == "kg" else 1 / 0.45359237
-        for series in record.get("sets", []):
-            try:
-                load = float(series.get("kg", 0))
-                if not math.isfinite(load) or load < 0:
-                    continue
-                values.append(fmt(load * scale, 1))
-            except (TypeError, ValueError):
-                continue
-        if not values:
-            return ""
-        day_recorded = html_escape(str(record.get("date", "")))
-        return f"Último real ({day_recorded}): {' / '.join(values)} {summary_unit}"
+        name = " ".join(str(exercise.get("exercise", "")).strip().casefold().split())
+        peak = MONTHLY_MAX.get(name)
+        if not peak:
+            return "—"
+        factor = 1.0 if summary_unit == "kg" else 1.0 / 0.45359237
+        value = fmt(peak["kg"] * factor, 1).removesuffix(",0")
+        return f"{value} {summary_unit}"
 
     st.markdown(
         f'<div class="finish" style="margin:12px 0 15px;padding:16px 20px">'
@@ -654,7 +614,7 @@ with tabs[1]:
         html_parts.append(
             f'<section class="quick-group {kind}">'
             f'<div class="quick-group-title">{heading}</div>'
-            '<div class="quick-cols"><span>EJERCICIO</span><span>SERIES × REPS</span><span>PESO</span></div>'
+            '<div class="quick-cols"><span>EJERCICIO</span><span>SERIES × REPS</span><span>PESO MÁX.</span></div>'
         )
         for position, exercise in group["items"]:
             ex_name = html_escape(str(exercise.get("exercise", "")))
@@ -662,32 +622,26 @@ with tabs[1]:
             reps = html_escape(str(exercise.get("repetitions", "—") or "—"))
             effort = str(exercise.get("intensity", "")).strip()
             notes = (" · " + html_escape(effort)) if effort else ""
-            weight_value, weight_source = quick_weight_text(exercise)
-            recent = quick_recent(exercise)
-            real_markup = (
-                f'<div class="quick-loading-note">{html_escape(recent)}</div>'
-                if recent else ""
-            )
+            weight_value = quick_weight_text(exercise)
             html_parts.append(
                 '<div class="quick-row">'
                 f'<div class="quick-ex"><span class="quick-num">{position:02d}.</span> {ex_name}'
                 f'<div class="quick-note">{html_escape(str(exercise.get("pattern", "")))}{notes}</div></div>'
                 f'<div class="quick-count">{series} × {reps}</div>'
-                f'<div class="quick-load">{html_escape(weight_value)}'
-                f'<div class="quick-loading-note">{html_escape(weight_source)}</div>'
-                f'{real_markup}</div></div>'
+                f'<div class="quick-load">{html_escape(weight_value)}</div></div>'
             )
         html_parts.append("</section>")
     st.markdown("".join(html_parts), unsafe_allow_html=True)
-    if summary_day == 3 and summary_week in (2, 3, 4):
+    if summary_day == 3 and ((summary_week - 1) % 4) + 1 in (2, 3, 4):
         st.caption("El Excel tiene solo dos ejercicios en el circuito abdominal del miércoles de esta semana.")
     if HISTORY.get("_offline"):
         st.warning("No se pudo actualizar el historial: pueden faltar los últimos pesos reales.")
     st.caption(
-        "Los pesos del seguimiento se muestran en la semana en que los reportaste, "
-        "con su fecha y su unidad (por lado, mancuerna o máquina). "
-        "Cuando no existe una carga confirmada aparece «—», sin copiar semana 1. "
-        "«Último real» corresponde exclusivamente a sesiones guardadas en esta aplicación."
+        "PESO MÁX.: mayor carga registrada para ese ejercicio en los últimos 30 días, "
+        "considerando el seguimiento y tus sesiones en la app. Cambia automáticamente "
+        "al registrar nuevos pesos o salir registros del período. "
+        "Si todavía no hay una carga fechada reciente, se muestra la referencia "
+        "inicial del Excel (sin fecha) como orientación. «—» = sin datos."
     )
 
 
@@ -1221,9 +1175,9 @@ with tabs[3]:
     plan_rows = pd.DataFrame(PLAN)
     included = ["week","day","pattern","block","exercise","series","repetitions",
                 "intensity","notes","set_type","set_group","reference_weight_lb","reference_weight_kg",
-                "reference_weight_lb_text"]
+                "reference_weight_lb_text","weekly_report","template_week"]
     st.download_button(
-        "⬇️ Descargar plan completo (4 semanas) en CSV",
+        "⬇️ Descargar plan completo (12 semanas) en CSV",
         plan_rows.reindex(columns=included, fill_value="").to_csv(index=False).encode("utf-8-sig"),
         "efg_training_plan_completo.csv", "text/csv",
         help="Incluye los ejercicios y pesos de referencia que existían en el Excel original."
