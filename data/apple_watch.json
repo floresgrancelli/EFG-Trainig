@@ -21,7 +21,10 @@
         "z5": 0
       },
       "source": "Apple Watch · Fitness · capturas del entrenamiento",
-      "notes": ""
+      "notes": "",
+      "plan_week": 4,
+      "plan_day": 2,
+      "plan_day_label": "Martes"
     }
   ]
 }
