@@ -1018,8 +1018,8 @@ with tabs[3]:
             weekly_labels = {
                 int(item["week"]): item["scope"] for item in weekly_points
             }
-            x_axis = ["Semana 1", "Semana 2", "Semana 3", "Semana 4"]
-            y_axis = [weekly_values.get(i) for i in range(1, 5)]
+            x_axis = list(PLAN_WEEKS)
+            y_axis = [weekly_values.get(i) for i in x_axis]
             weekly_chart = go.Figure()
             weekly_chart.add_trace(go.Scatter(
                 x=x_axis, y=y_axis, mode="lines+markers+text",
@@ -1035,7 +1035,11 @@ with tabs[3]:
             ))
             weekly_chart.update_layout(
                 yaxis_title="Carga reportada (lb, con su condición de uso)",
-                xaxis=dict(type="category"),
+                xaxis=dict(
+                    type="linear", tickmode="linear", dtick=1,
+                    range=[0.7, max(PLAN_WEEKS) + 0.3],
+                    title="Semana del plan",
+                ),
                 margin=dict(l=10, r=20, t=45, b=35),
             )
             st.plotly_chart(
