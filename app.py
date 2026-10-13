@@ -1423,12 +1423,36 @@ with tabs[7]:
                 ex = choices[selected]
                 ident = f"{edit_date.isoformat()}|{ex['id']}"
                 previous = next((s for s in SESSIONS if s.get("id")==ident), None)
-                series_count = parse_count(ex["series"])
+                previous_sets = previous.get("sets", []) if isinstance(previous, dict) else []
+                if not isinstance(previous_sets, list):
+                    previous_sets = []
+                recorded_count = len(previous_sets)
+                planned_count = parse_count(ex["series"])
+                # La rutina es una referencia; las series ejecutadas pueden diferir.
+                # Esta selección se hace fuera del formulario para crear o quitar
+                # inmediatamente los campos de las series reales.
+                series_count = st.number_input(
+                    "Cantidad de series REALIZADAS",
+                    min_value=1, max_value=12,
+                    value=max(1, min(12, recorded_count or planned_count)),
+                    step=1,
+                    key=f"register_sets_{ex['id']}_{edit_date.isoformat()}",
+                    help="Podés registrar más o menos series que las programadas "
+                         "sin modificar la rutina original.",
+                )
                 reps_plan = suggested_reps(ex["repetitions"], series_count)
                 st.caption(
-                    f"Objetivo: {ex['series']} series · {ex['repetitions']} repeticiones "
-                    f"· {ex['intensity'] or 'sin RIR indicado'}"
+                    f"Plan: {ex['series']} series · {ex['repetitions']} repeticiones "
+                    f"· {ex['intensity'] or 'sin RIR indicado'} "
+                    f"| Registro: {series_count} series efectivamente realizadas."
                 )
+                if recorded_count and series_count < recorded_count:
+                    st.warning(
+                        f"Esta sesión ya tiene {recorded_count} series guardadas. "
+                        f"Si ahora guardás {series_count}, las últimas "
+                        f"{recorded_count - series_count} se eliminarán del registro. "
+                        "Confirmá este cambio abajo para continuar."
+                    )
                 units = st.radio("Unidad de carga", ["kg", "lb"], horizontal=True, key="register_units")
                 with st.form("register_session_form", clear_on_submit=False):
                     new_sets = []
@@ -1501,6 +1525,15 @@ with tabs[7]:
                         value=previous.get("notes","") if previous else "",
                         key="register_notes",
                     )
+                    confirm_series_reduction = (
+                        st.checkbox(
+                            "Confirmo que quiero eliminar las series sobrantes "
+                            "del registro anterior.",
+                            key=f"confirm_reduce_{ex['id']}_{edit_date.isoformat()}",
+                        )
+                        if recorded_count and series_count < recorded_count
+                        else False
+                    )
                     submitted = st.form_submit_button(
                         "💾 GUARDAR ENTRENAMIENTO", type="primary",
                         use_container_width=True,
@@ -1509,6 +1542,8 @@ with tabs[7]:
                 if submitted:
                     if not new_sets:
                         st.error("No hay series para guardar.")
+                    elif recorded_count and series_count < recorded_count and not confirm_series_reduction:
+                        st.error("Confirmá primero la eliminación de las series guardadas.")
                     else:
                         try:
                             latest, _ = fetch_remote("data/history.json", TOKEN)
