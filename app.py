@@ -25,6 +25,7 @@ import requests
 from visuals import render_plan_charts, render_calendar, render_weight_chart
 from timer import render_rest_timer
 from watch import render_watch_dashboard
+from session_detail import render_session_detail
 
 st.set_page_config(
     page_title="EFG Training | Strength & Progress",
@@ -705,13 +706,28 @@ with tabs[3]:
         week_start = (dates - pd.to_timedelta(dates.dt.weekday, unit="D")).dt.date
         DF["Semana calendario"] = week_start.astype(str)
         sessions_count = len({r.get("date") for r in SESSIONS})
-        sets_count = len(DF)
+        confirmed_sets = sum(
+            1 for session in SESSIONS if isinstance(session, dict)
+            for item in session.get("sets", [])
+            if isinstance(item, dict) and isinstance(item.get("reps"), int)
+        )
+        confirmed_exercises = len({
+            str(session.get("exercise", "")).strip()
+            for session in SESSIONS if isinstance(session, dict)
+            and any(isinstance(item, dict) and isinstance(item.get("reps"), int)
+                    for item in session.get("sets", []))
+        })
         vol = DF["Volumen"].sum()
         a, b, c, d = st.columns(4)
         a.metric("Días entrenados", sessions_count)
-        b.metric("Series realizadas", sets_count)
-        c.metric("Volumen total", f"{fmt(vol, 0)} kg·rep")
-        d.metric("Ejercicios realizados", DF["Ejercicio"].nunique())
+        b.metric("Series confirmadas", confirmed_sets)
+        c.metric("Volumen calculable", f"{fmt(vol, 0)} kg·rep")
+        d.metric("Ejercicios con repeticiones", confirmed_exercises)
+        st.caption(
+            "El volumen es parcial: solo incluye series con carga total cuantificada y "
+            "repeticiones confirmadas. El detalle completo, incluso cargas por lado "
+            "y datos incompletos, está en HISTORIAL."
+        )
 
         by_week = DF.groupby("Semana calendario").agg(
             Volumen=("Volumen", "sum"),
@@ -812,6 +828,8 @@ with tabs[4]:
 
 with tabs[5]:
     st.markdown("### 📚 Historial y evolución de fuerza")
+    render_session_detail(SESSIONS)
+    st.divider()
     st.caption(
         "Tres fuentes diferenciadas: planilla inicial (semana 1), seguimiento "
         "conversado por semana y sesiones guardadas desde EFG Training."
