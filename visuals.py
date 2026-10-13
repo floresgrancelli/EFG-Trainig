@@ -66,7 +66,7 @@ def render_plan_charts(plan):
     st.markdown("### 🟣 Radiografía de la rutina")
     week = st.selectbox(
         "Elegí la semana para analizar la planificación",
-        options=[1, 2, 3, 4],
+        options=sorted({int(x["week"]) for x in plan}),
         format_func=lambda number: f"Semana {number}",
         key="efg_plan_charts_week",
     )
@@ -118,7 +118,8 @@ def render_plan_charts(plan):
         st.plotly_chart(_style(fig), use_container_width=True,
                         config={"displayModeBar": False})
     st.caption(
-        "Datos del programa original. Las categorías son agrupaciones descriptivas "
+        "Programa ampliado a 12 semanas con tres ciclos de cuatro semanas. "
+        "Las categorías son agrupaciones descriptivas "
         "según el patrón de la planilla; no equivalen al trabajo muscular efectivo."
     )
 
