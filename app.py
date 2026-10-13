@@ -533,6 +533,11 @@ announce(
     "Fuerza, método y datos para medir cada avance.",
 )
 
+# Mensaje visible en la parte superior tras st.rerun(), incluso si cambia la pestaña.
+save_notice = st.session_state.pop("efg_save_notice", "")
+if save_notice:
+    st.success(save_notice)
+
 tabs = st.tabs(["⚡ MI RUTINA", "📋 RUTINA RESUMEN", "⏱️ TEMPORIZADOR", "📊 PROGRESO", "⌚ APPLE WATCH", "📚 HISTORIAL", "⚖️ PESO", "🔐 ADMIN"])
 
 with tabs[0]:
@@ -1655,7 +1660,12 @@ with tabs[7]:
                                 f"EFG Training: registrar {ex['exercise']} {edit_date.isoformat()}",
                             )
                             public_history.clear()
-                            st.success("¡Sesión guardada online! Se verá públicamente en breve.")
+                            st.session_state["efg_save_notice"] = (
+                                f"✅ Entrenamiento GUARDADO en GitHub: "
+                                f"{ex['exercise']} · {edit_date.strftime('%d/%m/%Y')} "
+                                f"· {len(new_sets)} series. "
+                                "Ya podés ver las series realizadas en Rutina resumen."
+                            )
                             st.rerun()
                         except (requests.RequestException, ValueError, KeyError, TypeError) as error:
                             st.error(f"No se pudo guardar: {error}")
@@ -1665,9 +1675,6 @@ with tabs[7]:
                     "Editá la rutina y publicá los cambios en GitHub. "
                     "Se actualiza la vista de la app sin esperar un nuevo despliegue."
                 )
-                saved_plan_message = st.session_state.pop("efg_plan_saved", "")
-                if saved_plan_message:
-                    st.success(saved_plan_message)
                 modify_week = st.selectbox("Semana", PLAN_WEEKS, key="modify_week")
                 modify_day = st.selectbox(
                     "Día", [1,2,3,4,5], format_func=lambda x:DAY_NAMES[x-1],
@@ -1744,9 +1751,10 @@ with tabs[7]:
                                 f"EFG Training: actualizar semana {modify_week} día {modify_day}",
                             )
                             public_plan.clear()
-                            st.session_state["efg_plan_saved"] = (
-                                f"✅ Cambios publicados: semana {modify_week}, "
-                                f"{DAY_NAMES[modify_day-1]}, {e_name.strip()[:80]}."
+                            st.session_state["efg_save_notice"] = (
+                                f"✅ RUTINA ACTUALIZADA en GitHub: semana {modify_week}, "
+                                f"{DAY_NAMES[modify_day-1]} · {e_name.strip()[:80]}. "
+                                "Ya se puede consultar en Mi rutina y Rutina resumen."
                             )
                             st.rerun()
                         except (requests.RequestException, ValueError, KeyError, TypeError) as error:
@@ -1802,7 +1810,10 @@ with tabs[7]:
                             f"EFG Training: registrar peso corporal {weight_date.isoformat()}",
                         )
                         public_weight.clear()
-                        st.success("Peso corporal guardado. Ya figura en la pestaña pública de Peso.")
+                        st.session_state["efg_save_notice"] = (
+                            f"✅ PESO CORPORAL GUARDADO en GitHub: "
+                            f"{weight_value:.2f} kg · {weight_date.strftime('%d/%m/%Y')}."
+                        )
                         st.rerun()
                     except (requests.RequestException, ValueError, KeyError, TypeError) as error:
                         st.error(f"No se pudo guardar el peso corporal: {error}")
