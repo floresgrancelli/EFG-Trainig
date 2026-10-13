@@ -274,6 +274,21 @@ def load_plan_local() -> list[dict]:
     return json.loads(path.read_text(encoding="utf-8"))["entries"]
 
 
+@st.cache_data(ttl=45, show_spinner=False)
+def public_plan() -> list[dict]:
+    """Mostrar el plan publicado en GitHub sin esperar a un redepliegue.
+
+    Ante fallas de red, usar la última versión empaquetada con la app.
+    """
+    try:
+        data, _ = fetch_remote("data/plan.json")
+        if isinstance(data.get("entries"), list) and data["entries"]:
+            return data["entries"]
+    except (requests.RequestException, ValueError, KeyError, TypeError):
+        pass
+    return load_plan_local()
+
+
 def parse_count(value: str, fallback: int = 3) -> int:
     found = re.search(r"\d+", str(value))
     return max(1, min(12, int(found.group()) if found else fallback))
@@ -326,24 +341,6 @@ def weekly_report_weight(exercise: dict, unit: str = "lb") -> tuple[str, str] | 
     return label, context
 
 
-def load_scope_kind(scope: str) -> str:
-    """Normaliza el significado de una carga; no mezcla 'por lado' con peso total."""
-    value = str(scope or "").casefold()
-    if "por lado" in value:
-        return "por_lado_y_barra"
-    if "mancuerna" in value:
-        return "mancuernas_sin_desglosar"
-    if "peso corporal" in value:
-        return "peso_corporal"
-    if "disco" in value:
-        return "disco"
-    if "polea" in value:
-        return "polea"
-    if "máquina" in value or "maquina" in value:
-        return "maquina"
-    return "carga_externa"
-
-
 def monthly_maximum_weights(
     plan: list[dict], sessions: list[dict], as_of: date | None = None
 ) -> dict[str, dict]:
@@ -353,6 +350,24 @@ def monthly_maximum_weights(
     convierte en la carga total ni se suma una barra de peso desconocido.
     Una serie con carga ausente no aporta kg ficticios.
     """
+    # Local para que la verificación CI pueda aislar y ejecutar la función
+    # sin importar Streamlit ni depender de otros símbolos de app.py.
+    def normalize_scope(scope: str) -> str:
+        value = str(scope or "").casefold()
+        if "por lado" in value:
+            return "por_lado_y_barra"
+        if "mancuerna" in value:
+            return "mancuernas_sin_desglosar"
+        if "peso corporal" in value:
+            return "peso_corporal"
+        if "disco" in value:
+            return "disco"
+        if "polea" in value:
+            return "polea"
+        if "máquina" in value or "maquina" in value:
+            return "maquina"
+        return "carga_externa"
+
     current = as_of or date.today()
     window_start = current - timedelta(days=29)
     recent: dict[str, list[dict]] = {}
@@ -367,7 +382,7 @@ def monthly_maximum_weights(
         if not name or not math.isfinite(amount) or amount < 0 or amount > 1500:
             return
         target.setdefault(name, []).append({
-            "kg": amount, "scope": load_scope_kind(scope),
+            "kg": amount, "scope": normalize_scope(scope),
             "source": source, "date": when,
         })
 
@@ -499,7 +514,7 @@ def announce(kicker, title, sub):
     )
 
 
-PLAN = load_plan_local()
+PLAN = public_plan()
 PLAN_WEEKS = sorted({int(row['week']) for row in PLAN})
 HISTORY = public_history()
 WEIGHT = public_weight()
@@ -1647,9 +1662,12 @@ with tabs[7]:
 
             with edit_tabs[1]:
                 st.caption(
-                    "Permite corregir la planificación publicada. Guardar provoca una "
-                    "actualización automática de la app; puede tardar unos minutos."
+                    "Editá la rutina y publicá los cambios en GitHub. "
+                    "Se actualiza la vista de la app sin esperar un nuevo despliegue."
                 )
+                saved_plan_message = st.session_state.pop("efg_plan_saved", "")
+                if saved_plan_message:
+                    st.success(saved_plan_message)
                 modify_week = st.selectbox("Semana", PLAN_WEEKS, key="modify_week")
                 modify_day = st.selectbox(
                     "Día", [1,2,3,4,5], format_func=lambda x:DAY_NAMES[x-1],
@@ -1725,10 +1743,12 @@ with tabs[7]:
                                 "data/plan.json", current, TOKEN,
                                 f"EFG Training: actualizar semana {modify_week} día {modify_day}",
                             )
-                            st.success(
-                                "Plan actualizado en GitHub. La app mostrará los cambios "
-                                "después del redepliegue automático."
+                            public_plan.clear()
+                            st.session_state["efg_plan_saved"] = (
+                                f"✅ Cambios publicados: semana {modify_week}, "
+                                f"{DAY_NAMES[modify_day-1]}, {e_name.strip()[:80]}."
                             )
+                            st.rerun()
                         except (requests.RequestException, ValueError, KeyError, TypeError) as error:
                             st.error(f"No se pudo actualizar el plan: {error}")
 
