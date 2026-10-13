@@ -24,6 +24,7 @@ import streamlit as st
 import requests
 from visuals import render_plan_charts, render_calendar, render_weight_chart
 from timer import render_rest_timer
+from watch import render_watch_dashboard
 
 st.set_page_config(
     page_title="EFG Training | Strength & Progress",
@@ -212,6 +213,15 @@ def public_history() -> dict:
     except (requests.RequestException, ValueError, KeyError, TypeError):
         # Nunca inventamos registros: si no es posible leerlos, lo indicamos.
         return {"sessions": [], "_offline": True}
+
+
+@st.cache_data(ttl=45, show_spinner=False)
+def public_apple_watch() -> dict:
+    try:
+        data, _ = fetch_remote("data/apple_watch.json")
+        return data if isinstance(data.get("workouts"), list) else {"workouts": [], "_offline": True}
+    except (requests.RequestException, ValueError, KeyError, TypeError):
+        return {"workouts": [], "_offline": True}
 
 
 @st.cache_data(ttl=45, show_spinner=False)
@@ -446,6 +456,8 @@ PLAN = load_plan_local()
 PLAN_WEEKS = sorted({int(row['week']) for row in PLAN})
 HISTORY = public_history()
 WEIGHT = public_weight()
+WATCH = public_apple_watch()
+WATCH_WORKOUTS = WATCH.get("workouts", [])
 MEASUREMENTS = WEIGHT.get("measurements", [])
 SESSIONS = HISTORY.get("sessions", [])
 MONTHLY_MAX = monthly_maximum_weights(PLAN, SESSIONS)
@@ -459,7 +471,7 @@ announce(
     "Fuerza, método y datos para medir cada avance.",
 )
 
-tabs = st.tabs(["⚡ MI RUTINA", "📋 RUTINA RESUMEN", "⏱️ TEMPORIZADOR", "📊 PROGRESO", "📚 HISTORIAL", "⚖️ PESO", "🔐 ADMIN"])
+tabs = st.tabs(["⚡ MI RUTINA", "📋 RUTINA RESUMEN", "⏱️ TEMPORIZADOR", "📊 PROGRESO", "⌚ APPLE WATCH", "📚 HISTORIAL", "⚖️ PESO", "🔐 ADMIN"])
 
 with tabs[0]:
     st.markdown("### ⚡ Plan de entrenamiento")
@@ -792,6 +804,13 @@ with tabs[3]:
         render_calendar(SESSIONS)
 
 with tabs[4]:
+    render_watch_dashboard(
+        WATCH_WORKOUTS, offline=bool(WATCH.get("_offline")),
+        plot_layout=plot_layout,
+    )
+
+
+with tabs[5]:
     st.markdown("### 📚 Historial y evolución de fuerza")
     st.caption(
         "Tres fuentes diferenciadas: planilla inicial (semana 1), seguimiento "
@@ -1262,7 +1281,7 @@ with tabs[4]:
         help="Incluye los ejercicios y pesos de referencia que existían en el Excel original."
     )
 
-with tabs[5]:
+with tabs[6]:
     st.markdown("### ⚖️ Evolución del peso corporal")
     st.caption("Mediciones reales, registradas por fecha y visibles para todos.")
     if WEIGHT.get("_offline"):
@@ -1270,7 +1289,7 @@ with tabs[5]:
     render_weight_chart(MEASUREMENTS)
 
 
-with tabs[6]:
+with tabs[7]:
     st.markdown("### 🔐 Panel de administración")
     st.caption("La aplicación es pública. Este panel requiere tu PIN para guardar o modificar.")
 
