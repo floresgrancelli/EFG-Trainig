@@ -148,40 +148,6 @@
       "source": "Resumen de entrenamiento enviado en capturas 13/10/2026"
     },
     {
-      "id": "2026-10-13|s4-d2-f25",
-      "date": "2026-10-13",
-      "week": 4,
-      "day": 2,
-      "exercise_id": "s4-d2-f25",
-      "exercise": "Hipthrust con pausa 1-3-1",
-      "sets": [
-        {
-          "kg": null,
-          "reps": 8
-        },
-        {
-          "kg": null,
-          "reps": 8
-        },
-        {
-          "kg": null,
-          "reps": 8
-        }
-      ],
-      "reported_load_lb": 180,
-      "load_scope": "por lado + barra (peso de barra no informado)",
-      "reported_sets": 3,
-      "record_status": "repeticiones_confirmadas_carga_total_incompleta",
-      "rir": null,
-      "notes": "Hip thrust: 180 lb por lado más barra de peso no informado. Superserie seguida inmediatamente por estocadas inversas, 3 vueltas. El resumen destaca progresión desde 160 lb por lado (registro anterior sin fecha). FC reportada hasta ~150 lpm durante el bloque. La pausa del nombre del plan no se confirma en el registro de hoy.",
-      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026",
-      "previous_reference": {
-        "load_lb_per_side": 160,
-        "date": null,
-        "source": "progreso destacado en resumen"
-      }
-    },
-    {
       "id": "2026-10-13|s4-d2-f26",
       "date": "2026-10-13",
       "week": 4,
@@ -340,6 +306,41 @@
       "notes": "Luego de cada serie hago 10 sentadillas profundas sin peso",
       "source": "Resumen de entrenamiento enviado en capturas 13/10/2026",
       "saved_at": "2026-10-13T23:20:55.394265+00:00"
+    },
+    {
+      "id": "2026-10-13|s4-d2-f25",
+      "date": "2026-10-13",
+      "week": 4,
+      "day": 2,
+      "exercise_id": "s4-d2-f25",
+      "exercise": "Hipthrust con pausa 1-3-1",
+      "sets": [
+        {
+          "kg": null,
+          "reps": 8
+        },
+        {
+          "kg": null,
+          "reps": 8
+        },
+        {
+          "kg": null,
+          "reps": 8
+        }
+      ],
+      "reported_load_lb": 180,
+      "load_scope": "por lado + barra (peso de barra no informado)",
+      "reported_sets": 3,
+      "record_status": "repeticiones_confirmadas_carga_total_incompleta",
+      "rir": 2,
+      "notes": "",
+      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026",
+      "previous_reference": {
+        "load_lb_per_side": 160,
+        "date": null,
+        "source": "progreso destacado en resumen"
+      },
+      "saved_at": "2026-10-13T23:21:53.887925+00:00"
     }
   ]
 }
