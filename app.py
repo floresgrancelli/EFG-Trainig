@@ -146,7 +146,11 @@ st.markdown(
     .quick-ex {min-width:0;font-size:.93rem;line-height:1.23;font-weight:800;color:#FCF8FF;overflow-wrap:anywhere}
     .quick-num {color:#BDA0DD;padding-right:6px;font-size:.77rem}
     .quick-note {font-size:.73rem;font-weight:500;color:#BAACCD;margin-top:4px;line-height:1.35}
-    .quick-count {font-size:.99rem;font-weight:850;color:#F5E7FF;white-space:nowrap}
+    .quick-count {font-size:.99rem;font-weight:850;color:#F5E7FF;white-space:normal}
+    .quick-plan {font-size:.80rem;color:#BEAAD9;font-weight:650;line-height:1.35}
+    .quick-actual {font-size:.86rem;color:#B4FAEB;font-weight:850;line-height:1.3;
+      margin-top:5px;overflow-wrap:anywhere}
+    .quick-actual-date {font-size:.69rem;color:#A8D7CC;font-weight:500}
     .quick-load {font-size:.87rem;font-weight:800;color:#B4FAEB;overflow-wrap:anywhere}
     .quick-muted {color:#B6A6CA;font-weight:600}
     .quick-loading-note {color:#BAACCD;font-size:.71rem;line-height:1.35;font-weight:500;margin-top:4px}
@@ -622,6 +626,55 @@ with tabs[1]:
         x for x in PLAN
         if int(x["week"]) == summary_week and int(x["day"]) == summary_day
     ]
+    # Resumen de ejercicios realmente cargados en esta semana/día.
+    # La planificación sigue intacta; mostramos ambas versiones.
+    completed_for_day = {}
+    for registered in SESSIONS:
+        if not isinstance(registered, dict):
+            continue
+        try:
+            same_slot = (int(registered.get("week", -1)) == summary_week
+                         and int(registered.get("day", -1)) == summary_day)
+        except (TypeError, ValueError):
+            continue
+        if not same_slot:
+            continue
+        exercise_id = str(registered.get("exercise_id", ""))
+        if not exercise_id:
+            continue
+        if (exercise_id not in completed_for_day
+                or str(registered.get("date", "")) >=
+                   str(completed_for_day[exercise_id].get("date", ""))):
+            completed_for_day[exercise_id] = registered
+
+    def quick_recorded_sets(exercise):
+        latest = completed_for_day.get(str(exercise.get("id", "")))
+        if not latest:
+            return ""
+        real_sets = latest.get("sets")
+        if not isinstance(real_sets, list) or not real_sets:
+            return ""
+        counts = []
+        for series in real_sets:
+            if not isinstance(series, dict):
+                continue
+            try:
+                counts.append(str(max(0, int(series.get("reps", 0)))))
+            except (TypeError, ValueError):
+                counts.append("?")
+        if not counts:
+            return ""
+        reps_text = counts[0] if len(set(counts)) == 1 else "/".join(counts)
+        when = str(latest.get("date", ""))
+        try:
+            shown_date = date.fromisoformat(when).strftime("%d/%m")
+        except ValueError:
+            shown_date = when[:10]
+        return (
+            f'<div class="quick-actual">HECHO: {len(counts)} × {html_escape(reps_text)}</div>'
+            f'<div class="quick-actual-date">Registrado: {html_escape(shown_date)}</div>'
+        )
+
     def quick_weight_text(exercise):
         name = " ".join(str(exercise.get("exercise", "")).strip().casefold().split())
         peak = MONTHLY_MAX.get(name)
@@ -643,6 +696,11 @@ with tabs[1]:
         f'<h3 style="margin:3px 0 4px">SEMANA {summary_week} · {DAY_NAMES[summary_day - 1].upper()}</h3>'
         f'<div class="muted">{len(day_exercises)} ejercicios · máximos en {summary_unit}</div></div>',
         unsafe_allow_html=True,
+    )
+    st.caption(
+        "El resumen muestra el PLAN y, si guardaste series para ese ejercicio "
+        "en la semana elegida, también el último registro HECHO. "
+        "No se modifica la rutina original."
     )
     st.markdown(
         '<div class="efg-legend" aria-label="Referencia visual">'
@@ -684,11 +742,13 @@ with tabs[1]:
             effort = str(exercise.get("intensity", "")).strip()
             notes = (" · " + html_escape(effort)) if effort else ""
             weight_value = quick_weight_text(exercise)
+            recorded_text = quick_recorded_sets(exercise)
             html_parts.append(
                 '<div class="quick-row">'
                 f'<div class="quick-ex"><span class="quick-num">{position:02d}.</span> {ex_name}'
                 f'<div class="quick-note">{html_escape(str(exercise.get("pattern", "")))}{notes}</div></div>'
-                f'<div class="quick-count">{series} × {reps}</div>'
+                f'<div class="quick-count"><div class="quick-plan">PLAN: {series} × {reps}</div>'
+                f'{recorded_text}</div>'
                 f'<div class="quick-load">{html_escape(weight_value)}</div></div>'
             )
         html_parts.append("</section>")
