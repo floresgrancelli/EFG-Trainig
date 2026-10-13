@@ -263,8 +263,8 @@ margin:14px auto 0;max-width:620px}
     });
   });
   start.addEventListener("click",function(){
-    armSound();
     stopChime();
+    armSound();
     if(remaining===0){remaining=selected*1000;}
     deadline=Date.now()+remaining;running=true;finished=false;
     keepAwake();
