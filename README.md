@@ -4,8 +4,8 @@ App independiente de entrenamiento, con estética negro/púrpura, rutina importa
 
 ## Qué se importó
 
-- **5 días por semana y 4 semanas de programación**.
-- **182 filas de ejercicios** (46 + 46 + 45 + 45), con todos los nombres, series, repeticiones, intensidad/RIR, patrón muscular, bloque y observaciones técnicas.
+- **5 días por semana y 12 semanas de programación** (3 ciclos de 4 semanas).
+- **182 ejercicios del plan original** (46 + 46 + 45 + 45), conservados, más **362** en las semanas 5–12 (estructura repetida): total **544 ejercicios programados**. Las cargas futuras no se inventan.
 - **33 pesos de referencia informados en libras** en la primera semana y sus conversiones a kg.
 - Caso especial de curl femoral **70 / 90 / 110 / 110 lb**, conservado como cuatro cargas por serie en lugar del error original de la planilla.
 - Las celdas vacías permanecen vacías. Ninguna de las cargas de referencia se presenta como sesión efectivamente realizada.
@@ -14,7 +14,7 @@ App independiente de entrenamiento, con estética negro/púrpura, rutina importa
 ## Archivos
 
 - \`app.py\`: app web pública, gráficos, registro y edición.
-- \`data/plan.json\`: programación de cuatro semanas, importada desde Excel.
+- \`data/plan.json\`: programación de doce semanas; cuatro originales importadas desde Excel y ocho creadas repitiendo el ciclo.
 - \`data/history.json\`: sesiones reales. Comienza vacío y se guarda en GitHub cuando el administrador registra datos.
 - \`requirements.txt\`: dependencias.
 - \`.streamlit/config.toml\`: tema oscuro violeta.
@@ -52,7 +52,15 @@ Con el PIN correcto, la pestaña **ADMIN** permite:
 - Actualizar una sesión anterior registrando de nuevo el mismo ejercicio y fecha.
 - Editar el texto del plan; GitHub redepliega automáticamente la nueva versión.
 
-Cada modificación se registra como commit. El público puede consultar la rutina y el historial, pero no puede escribir sin el token privado. Los gráficos se generan con sesiones **reales**, no a partir de las referencias del Excel.
+Cada modificación se registra como commit. El público puede consultar la rutina y el historial, pero no puede escribir sin el token privado. Los gráficos de sesiones reales se generan con sesiones **reales**, sin convertir referencias del Excel en entrenamientos inventados.
+
+## Máximo móvil en la rutina resumida
+
+- La solapa **Rutina resumen** permite elegir las 12 semanas, de lunes a viernes, y ver pesos en kg/lb.
+- Muestra **una sola cifra por ejercicio**, sin subtítulo de «semana 1»: la mayor carga conocida de los **últimos 30 días**, considerando reportes semanales y sesiones registradas desde ADMIN.
+- Una carga nueva mayor actualiza automáticamente el máximo cuando se refresca el historial; puede bajar si un registro anterior queda fuera de los 30 días.
+- Sin dato fechado reciente, se conserva como orientación la **referencia inicial sin fecha del Excel**, identificada en una nota general. No se presenta como entrenamiento nuevo.
+- Las semanas 5–12 repiten el esquema de las primeras cuatro (sin progresiones de peso inventadas). Pueden editarse desde ADMIN.
 
 ## Independencia del laboratorio
 
