@@ -294,6 +294,6 @@ margin:14px auto 0;max-width:620px}
 </script>
 </body>
 </html>""",
-        height=550,
+        height=625,
         scrolling=False,
     )
