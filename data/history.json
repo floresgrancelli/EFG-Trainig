@@ -1,4 +1,344 @@
 {
   "schema_version": 1,
-  "sessions": []
+  "sessions": [
+    {
+      "id": "2026-10-13|s4-d2-extra-sentadilla-profunda",
+      "date": "2026-10-13",
+      "week": 4,
+      "day": 2,
+      "exercise_id": "s4-d2-extra-sentadilla-profunda",
+      "exercise": "Sentadillas profundas sin peso",
+      "sets": [
+        {
+          "kg": 0,
+          "reps": 10,
+          "load_lb": 0,
+          "load_scope": "peso corporal"
+        },
+        {
+          "kg": 0,
+          "reps": 10,
+          "load_lb": 0,
+          "load_scope": "peso corporal"
+        },
+        {
+          "kg": 0,
+          "reps": 10,
+          "load_lb": 0,
+          "load_scope": "peso corporal"
+        },
+        {
+          "kg": 0,
+          "reps": 10,
+          "load_lb": 0,
+          "load_scope": "peso corporal"
+        }
+      ],
+      "reported_load_lb": 0,
+      "load_scope": "peso corporal",
+      "reported_sets": 4,
+      "record_status": "confirmado",
+      "rir": null,
+      "notes": "Realizadas inmediatamente después de cada una de las cuatro series de sentadilla con barra. El peso corporal no se suma a la carga externa del volumen.",
+      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026"
+    },
+    {
+      "id": "2026-10-13|s4-d2-f21",
+      "date": "2026-10-13",
+      "week": 4,
+      "day": 2,
+      "exercise_id": "s4-d2-f21",
+      "exercise": "Abdominales cortitos c/disco",
+      "sets": [
+        {
+          "kg": 11.34,
+          "reps": 30,
+          "load_lb": 25,
+          "load_scope": "disco"
+        },
+        {
+          "kg": 11.34,
+          "reps": 30,
+          "load_lb": 25,
+          "load_scope": "disco"
+        },
+        {
+          "kg": 11.34,
+          "reps": 30,
+          "load_lb": 25,
+          "load_scope": "disco"
+        }
+      ],
+      "reported_load_lb": 25,
+      "load_scope": "disco",
+      "reported_sets": 3,
+      "record_status": "confirmado",
+      "rir": null,
+      "notes": "Circuito core: 3 vueltas, primer ejercicio. La rutina original indicaba 2 series; se registran las 3 realizadas.",
+      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026"
+    },
+    {
+      "id": "2026-10-13|s4-d2-f22",
+      "date": "2026-10-13",
+      "week": 4,
+      "day": 2,
+      "exercise_id": "s4-d2-f22",
+      "exercise": "Vitalizaciones con disco",
+      "sets": [
+        {
+          "kg": 11.34,
+          "reps": 10,
+          "load_lb": 25,
+          "load_scope": "disco"
+        },
+        {
+          "kg": 11.34,
+          "reps": 10,
+          "load_lb": 25,
+          "load_scope": "disco"
+        },
+        {
+          "kg": 11.34,
+          "reps": 10,
+          "load_lb": 25,
+          "load_scope": "disco"
+        }
+      ],
+      "reported_load_lb": 25,
+      "load_scope": "disco",
+      "reported_sets": 3,
+      "record_status": "confirmado",
+      "rir": null,
+      "notes": "Circuito core: 3 vueltas, segundo ejercicio. Ejecución confirmada 3×10; plan original 2×6.",
+      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026"
+    },
+    {
+      "id": "2026-10-13|s4-d2-f23",
+      "date": "2026-10-13",
+      "week": 4,
+      "day": 2,
+      "exercise_id": "s4-d2-f23",
+      "exercise": "Buenos dias con disco",
+      "sets": [
+        {
+          "kg": 11.34,
+          "reps": 10,
+          "load_lb": 25,
+          "load_scope": "disco"
+        },
+        {
+          "kg": 11.34,
+          "reps": 10,
+          "load_lb": 25,
+          "load_scope": "disco"
+        },
+        {
+          "kg": 11.34,
+          "reps": 10,
+          "load_lb": 25,
+          "load_scope": "disco"
+        }
+      ],
+      "reported_load_lb": 25,
+      "load_scope": "disco",
+      "reported_sets": 3,
+      "record_status": "confirmado",
+      "rir": null,
+      "notes": "Circuito core: 3 vueltas, tercer ejercicio. Ejecución confirmada 3×10; plan original 2×6.",
+      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026"
+    },
+    {
+      "id": "2026-10-13|s4-d2-f24",
+      "date": "2026-10-13",
+      "week": 4,
+      "day": 2,
+      "exercise_id": "s4-d2-f24",
+      "exercise": "Sentadilla libre",
+      "sets": [
+        {
+          "kg": null,
+          "reps": 10
+        },
+        {
+          "kg": null,
+          "reps": 10
+        },
+        {
+          "kg": null,
+          "reps": 10
+        },
+        {
+          "kg": null,
+          "reps": 10
+        }
+      ],
+      "reported_load_lb": 70,
+      "load_scope": "por lado + barra (peso de barra no informado)",
+      "reported_sets": 4,
+      "record_status": "repeticiones_confirmadas_carga_total_incompleta",
+      "rir": null,
+      "notes": "Sentadilla con barra: 70 lb por lado más barra de peso no especificado. No se calcula carga total ni tonelaje hasta saber peso de barra. Después de cada serie, 10 sentadillas profundas sin peso.",
+      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026"
+    },
+    {
+      "id": "2026-10-13|s4-d2-f25",
+      "date": "2026-10-13",
+      "week": 4,
+      "day": 2,
+      "exercise_id": "s4-d2-f25",
+      "exercise": "Hipthrust con pausa 1-3-1",
+      "sets": [
+        {
+          "kg": null,
+          "reps": 8
+        },
+        {
+          "kg": null,
+          "reps": 8
+        },
+        {
+          "kg": null,
+          "reps": 8
+        }
+      ],
+      "reported_load_lb": 180,
+      "load_scope": "por lado + barra (peso de barra no informado)",
+      "reported_sets": 3,
+      "record_status": "repeticiones_confirmadas_carga_total_incompleta",
+      "rir": null,
+      "notes": "Hip thrust: 180 lb por lado más barra de peso no informado. Superserie seguida inmediatamente por estocadas inversas, 3 vueltas. El resumen destaca progresión desde 160 lb por lado (registro anterior sin fecha). FC reportada hasta ~150 lpm durante el bloque. La pausa del nombre del plan no se confirma en el registro de hoy.",
+      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026",
+      "previous_reference": {
+        "load_lb_per_side": 160,
+        "date": null,
+        "source": "progreso destacado en resumen"
+      }
+    },
+    {
+      "id": "2026-10-13|s4-d2-f26",
+      "date": "2026-10-13",
+      "week": 4,
+      "day": 2,
+      "exercise_id": "s4-d2-f26",
+      "exercise": "Estocadas hacia atras con mancuernas",
+      "sets": [
+        {
+          "kg": null,
+          "reps": 8
+        },
+        {
+          "kg": null,
+          "reps": 8
+        },
+        {
+          "kg": null,
+          "reps": 8
+        }
+      ],
+      "reported_load_lb": 50,
+      "load_scope": "50 lb informadas, sin aclarar si carga total o por mancuerna",
+      "reported_sets": 3,
+      "record_status": "repeticiones_confirmadas_alcance_carga_incierto",
+      "rir": null,
+      "notes": "Estocadas inversas, superserie luego de hip thrust, 3 vueltas. La captura informa 50 lb, no precisa si es por mancuerna o total; evitar calcular volumen hasta aclararlo.",
+      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026"
+    },
+    {
+      "id": "2026-10-13|s4-d2-f27",
+      "date": "2026-10-13",
+      "week": 4,
+      "day": 2,
+      "exercise_id": "s4-d2-f27",
+      "exercise": "Extension de cuadriceps",
+      "sets": [
+        {
+          "kg": null,
+          "reps": 12
+        },
+        {
+          "kg": null,
+          "reps": 10
+        },
+        {
+          "kg": null,
+          "reps": 8
+        },
+        {
+          "kg": 106.594,
+          "reps": 8,
+          "load_lb": 235,
+          "load_scope": "maquina: última serie"
+        }
+      ],
+      "reported_load_lb": 235,
+      "load_scope": "máquina; carga progresiva, solo última serie confirmada 235 lb",
+      "reported_sets": 4,
+      "record_status": "repeticiones_confirmadas_cargas_anteriores_pendientes",
+      "rir": null,
+      "notes": "4 series progresivas: 12, 10, 8, 8 repeticiones. Solo se conoce la última carga de 235 lb. No se inventan las primeras tres cargas. Superserie con aductores (según rutina original).",
+      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026"
+    },
+    {
+      "id": "2026-10-13|s4-d2-f28",
+      "date": "2026-10-13",
+      "week": 4,
+      "day": 2,
+      "exercise_id": "s4-d2-f28",
+      "exercise": "Aductores",
+      "sets": [
+        {
+          "kg": 68.039,
+          "reps": 12,
+          "load_lb": 150,
+          "load_scope": "máquina"
+        },
+        {
+          "kg": 68.039,
+          "reps": 12,
+          "load_lb": 150,
+          "load_scope": "máquina"
+        },
+        {
+          "kg": 68.039,
+          "reps": 12,
+          "load_lb": 150,
+          "load_scope": "máquina"
+        },
+        {
+          "kg": 68.039,
+          "reps": 12,
+          "load_lb": 150,
+          "load_scope": "máquina"
+        }
+      ],
+      "reported_load_lb": 150,
+      "load_scope": "máquina",
+      "reported_sets": 4,
+      "record_status": "confirmado",
+      "rir": null,
+      "notes": "4×12 a 150 lb, según resumen del entrenamiento. Asociado al bloque con extensión de cuádriceps.",
+      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026"
+    },
+    {
+      "id": "2026-10-13|s4-d2-f29",
+      "date": "2026-10-13",
+      "week": 4,
+      "day": 2,
+      "exercise_id": "s4-d2-f29",
+      "exercise": "Patada de gluteos en polea",
+      "sets": [],
+      "reported_load_lb": 47.5,
+      "load_scope": "polea",
+      "reported_sets": 0,
+      "record_status": "carga_confirmada_series_y_reps_no_confirmadas",
+      "rir": null,
+      "notes": "Confirmadas 47,5 lb hoy. 4×10 es referencia de entrenamientos anteriores, NO dato realizado confirmado para hoy. Progreso de carga informado de 40 a 47,5 lb (registro anterior sin fecha).",
+      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026",
+      "previous_reference": {
+        "load_lb": 40,
+        "date": null,
+        "source": "progreso destacado en resumen"
+      }
+    }
+  ]
 }
