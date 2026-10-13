@@ -322,20 +322,39 @@ def weekly_report_weight(exercise: dict, unit: str = "lb") -> tuple[str, str] | 
     return label, context
 
 
+def load_scope_kind(scope: str) -> str:
+    """Normaliza el significado de una carga; no mezcla 'por lado' con peso total."""
+    value = str(scope or "").casefold()
+    if "por lado" in value:
+        return "por_lado_y_barra"
+    if "mancuerna" in value:
+        return "mancuernas_sin_desglosar"
+    if "peso corporal" in value:
+        return "peso_corporal"
+    if "disco" in value:
+        return "disco"
+    if "polea" in value:
+        return "polea"
+    if "máquina" in value or "maquina" in value:
+        return "maquina"
+    return "carga_externa"
+
+
 def monthly_maximum_weights(
     plan: list[dict], sessions: list[dict], as_of: date | None = None
 ) -> dict[str, dict]:
-    """Máximos de carga externa por movimiento en los últimos 30 días.
+    """Máximo móvil con cargas comparables, incluyendo reportes parciales.
 
-    Cuando no hay cargas fechadas recientes, se conserva la referencia inicial
-    del Excel, sin adjudicarle una fecha ni crear una sesión realizada.
+    '180 lb por lado + barra' se conserva como 180 lb/lado: nunca se
+    convierte en la carga total ni se suma una barra de peso desconocido.
+    Una serie con carga ausente no aporta kg ficticios.
     """
     current = as_of or date.today()
     window_start = current - timedelta(days=29)
-    recent: dict[str, dict] = {}
-    initial: dict[str, dict] = {}
+    recent: dict[str, list[dict]] = {}
+    historical: dict[str, list[dict]] = {}
 
-    def add(target, exercise, raw_kg, source):
+    def add(target, exercise, raw_kg, scope, source, when):
         name = " ".join(str(exercise).strip().casefold().split())
         try:
             amount = float(raw_kg)
@@ -343,55 +362,78 @@ def monthly_maximum_weights(
             return
         if not name or not math.isfinite(amount) or amount < 0 or amount > 1500:
             return
-        if name not in target or amount > target[name]["kg"]:
-            target[name] = {"kg": amount, "source": source}
+        target.setdefault(name, []).append({
+            "kg": amount, "scope": load_scope_kind(scope),
+            "source": source, "date": when,
+        })
 
     for ex in plan:
+        name = ex.get("exercise", "")
         if int(ex.get("week", 0)) == 1:
-            series = ex.get("reference_series_kg")
-            if isinstance(series, list) and series:
-                for weight in series:
-                    add(initial, ex.get("exercise", ""), weight, "excel_inicial")
+            # Referencia sin fecha: solo se utilizará si no hay carga fechada reciente.
+            initial_series = ex.get("reference_series_kg")
+            if isinstance(initial_series, list) and initial_series:
+                for value in initial_series:
+                    add(historical, name, value, "", "excel_inicial", None)
             elif ex.get("reference_weight_kg") is not None:
-                add(initial, ex.get("exercise", ""), ex.get("reference_weight_kg"), "excel_inicial")
-
+                add(historical, name, ex.get("reference_weight_kg"), "", "excel_inicial", None)
         report = ex.get("weekly_report")
         if not isinstance(report, dict):
             continue
         try:
-            logged = date.fromisoformat(str(report.get("date", "")))
-        except ValueError:
+            reported_day = date.fromisoformat(str(report.get("date", "")))
+        except (TypeError, ValueError):
             continue
-        if not window_start <= logged <= current:
+        if not window_start <= reported_day <= current:
             continue
         pounds = report.get("series_lb")
         if not isinstance(pounds, list) or not pounds:
             pounds = [report.get("lb")]
-        for weight in pounds:
-            if weight is None:
-                continue
+        for value in pounds:
             try:
-                add(recent, ex.get("exercise", ""), float(weight) * 0.45359237, "seguimiento")
-            except (ValueError, TypeError):
+                converted = float(value) * 0.45359237
+            except (TypeError, ValueError):
                 continue
+            add(recent, name, converted, report.get("scope"), "seguimiento", reported_day)
 
     for session in sessions:
         if not isinstance(session, dict):
             continue
         try:
-            logged = date.fromisoformat(str(session.get("date", "")))
-        except ValueError:
+            recorded_day = date.fromisoformat(str(session.get("date", "")))
+        except (TypeError, ValueError):
             continue
-        if not window_start <= logged <= current:
+        if not window_start <= recorded_day <= current:
             continue
-        for series in session.get("sets", []):
-            if isinstance(series, dict):
-                add(recent, session.get("exercise", ""), series.get("kg"), "app")
+        name = session.get("exercise", "")
+        reported_lb = session.get("reported_load_lb")
+        if reported_lb is not None:
+            try:
+                kg = float(reported_lb) * 0.45359237
+            except (TypeError, ValueError):
+                continue
+            add(recent, name, kg, session.get("load_scope"), "app", recorded_day)
+        else:
+            for series in session.get("sets", []):
+                if isinstance(series, dict):
+                    add(recent, name, series.get("kg"), series.get("load_scope"),
+                        "app", recorded_day)
 
-    result = dict(initial)
-    result.update(recent)
+    result: dict[str, dict] = {}
+    for name in set(historical) | set(recent):
+        if recent.get(name):
+            records = recent[name]
+            # Si cambia la modalidad registrada, no comparar kg por lado con
+            # kilogramos totales: elegimos la modalidad más reciente.
+            newest = max(
+                enumerate(records),
+                key=lambda item: (item[1]["date"], item[1]["source"] == "app", item[0]),
+            )[1]
+            comparable = [item for item in records if item["scope"] == newest["scope"]]
+            result[name] = max(comparable, key=lambda item: item["kg"])
+        elif historical.get(name):
+            result[name] = max(historical[name], key=lambda item: item["kg"])
     return result
-
 
 def plot_layout(fig, height=370):
     fig.update_layout(
@@ -586,7 +628,13 @@ with tabs[1]:
         if not peak:
             return "—"
         factor = 1.0 if summary_unit == "kg" else 1.0 / 0.45359237
+        if peak.get("scope") == "peso_corporal":
+            return "Peso corporal"
         value = fmt(peak["kg"] * factor, 1).removesuffix(",0")
+        if peak.get("scope") == "por_lado_y_barra":
+            return f"{value} {summary_unit}/lado + barra"
+        if peak.get("scope") == "mancuernas_sin_desglosar":
+            return f"{value} {summary_unit} · mancuernas*"
         return f"{value} {summary_unit}"
 
     st.markdown(
@@ -650,11 +698,13 @@ with tabs[1]:
     if HISTORY.get("_offline"):
         st.warning("No se pudo actualizar el historial: pueden faltar los últimos pesos reales.")
     st.caption(
-        "PESO MÁX.: mayor carga registrada para ese ejercicio en los últimos 30 días, "
-        "considerando el seguimiento y tus sesiones en la app. Cambia automáticamente "
-        "al registrar nuevos pesos o salir registros del período. "
-        "Si todavía no hay una carga fechada reciente, se muestra la referencia "
-        "inicial del Excel (sin fecha) como orientación. «—» = sin datos."
+        "PESO MÁX.: mayor carga comparable registrada en los últimos 30 días, "
+        "aunque en el último entrenamiento hayas usado menos. "
+        "Los pesos por lado se muestran por lado + barra, sin inventar el peso de la barra. "
+        "En mancuernas (*) no se presupone si la cifra es total o por mancuerna. "
+        "Las cargas confirmadas sin repeticiones también cuentan como referencia de peso. "
+        "Sin dato reciente se conserva la referencia inicial del Excel, sin fecha. "
+        "«—» significa que no hay carga registrada."
     )
 
 
