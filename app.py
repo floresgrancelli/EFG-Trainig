@@ -23,6 +23,7 @@ import plotly.graph_objects as go
 import streamlit as st
 import requests
 from visuals import render_plan_charts, render_calendar, render_weight_chart
+from timer import render_rest_timer
 
 st.set_page_config(
     page_title="EFG Training | Strength & Progress",
@@ -458,7 +459,7 @@ announce(
     "Fuerza, método y datos para medir cada avance.",
 )
 
-tabs = st.tabs(["⚡ MI RUTINA", "📋 RUTINA RESUMEN", "📊 PROGRESO", "📚 HISTORIAL", "⚖️ PESO", "🔐 ADMIN"])
+tabs = st.tabs(["⚡ MI RUTINA", "📋 RUTINA RESUMEN", "⏱️ TEMPORIZADOR", "📊 PROGRESO", "📚 HISTORIAL", "⚖️ PESO", "🔐 ADMIN"])
 
 with tabs[0]:
     st.markdown("### ⚡ Plan de entrenamiento")
@@ -645,6 +646,10 @@ with tabs[1]:
 
 
 with tabs[2]:
+    render_rest_timer()
+
+
+with tabs[3]:
     st.markdown("### 📊 Tu evolución, en números")
     render_plan_charts(PLAN)
     st.divider()
@@ -786,7 +791,7 @@ with tabs[2]:
         )
         render_calendar(SESSIONS)
 
-with tabs[3]:
+with tabs[4]:
     st.markdown("### 📚 Historial y evolución de fuerza")
     st.caption(
         "Tres fuentes diferenciadas: planilla inicial (semana 1), seguimiento "
@@ -1257,7 +1262,7 @@ with tabs[3]:
         help="Incluye los ejercicios y pesos de referencia que existían en el Excel original."
     )
 
-with tabs[4]:
+with tabs[5]:
     st.markdown("### ⚖️ Evolución del peso corporal")
     st.caption("Mediciones reales, registradas por fecha y visibles para todos.")
     if WEIGHT.get("_offline"):
@@ -1265,7 +1270,7 @@ with tabs[4]:
     render_weight_chart(MEASUREMENTS)
 
 
-with tabs[5]:
+with tabs[6]:
     st.markdown("### 🔐 Panel de administración")
     st.caption("La aplicación es pública. Este panel requiere tu PIN para guardar o modificar.")
 
