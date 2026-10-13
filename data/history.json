@@ -148,27 +148,6 @@
       "source": "Resumen de entrenamiento enviado en capturas 13/10/2026"
     },
     {
-      "id": "2026-10-13|s4-d2-f29",
-      "date": "2026-10-13",
-      "week": 4,
-      "day": 2,
-      "exercise_id": "s4-d2-f29",
-      "exercise": "Patada de gluteos en polea",
-      "sets": [],
-      "reported_load_lb": 47.5,
-      "load_scope": "polea",
-      "reported_sets": 0,
-      "record_status": "carga_confirmada_series_y_reps_no_confirmadas",
-      "rir": null,
-      "notes": "Confirmadas 47,5 lb hoy. 4×10 es referencia de entrenamientos anteriores, NO dato realizado confirmado para hoy. Progreso de carga informado de 40 a 47,5 lb (registro anterior sin fecha).",
-      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026",
-      "previous_reference": {
-        "load_lb": 40,
-        "date": null,
-        "source": "progreso destacado en resumen"
-      }
-    },
-    {
       "id": "2026-10-13|s4-d2-f24",
       "date": "2026-10-13",
       "week": 4,
@@ -339,6 +318,45 @@
       "notes": "",
       "source": "Resumen de entrenamiento enviado en capturas 13/10/2026",
       "saved_at": "2026-10-13T23:27:18.588292+00:00"
+    },
+    {
+      "id": "2026-10-13|s4-d2-f29",
+      "date": "2026-10-13",
+      "week": 4,
+      "day": 2,
+      "exercise_id": "s4-d2-f29",
+      "exercise": "Patada de gluteos en polea",
+      "sets": [
+        {
+          "kg": null,
+          "reps": 10
+        },
+        {
+          "kg": null,
+          "reps": 10
+        },
+        {
+          "kg": null,
+          "reps": 10
+        },
+        {
+          "kg": null,
+          "reps": 10
+        }
+      ],
+      "reported_load_lb": 47.5,
+      "load_scope": "polea",
+      "reported_sets": 0,
+      "record_status": "carga_confirmada_series_y_reps_no_confirmadas",
+      "rir": 2,
+      "notes": "",
+      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026",
+      "previous_reference": {
+        "load_lb": 40,
+        "date": null,
+        "source": "progreso destacado en resumen"
+      },
+      "saved_at": "2026-10-13T23:28:43.928185+00:00"
     }
   ]
 }
