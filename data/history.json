@@ -148,39 +148,6 @@
       "source": "Resumen de entrenamiento enviado en capturas 13/10/2026"
     },
     {
-      "id": "2026-10-13|s4-d2-f24",
-      "date": "2026-10-13",
-      "week": 4,
-      "day": 2,
-      "exercise_id": "s4-d2-f24",
-      "exercise": "Sentadilla libre",
-      "sets": [
-        {
-          "kg": null,
-          "reps": 10
-        },
-        {
-          "kg": null,
-          "reps": 10
-        },
-        {
-          "kg": null,
-          "reps": 10
-        },
-        {
-          "kg": null,
-          "reps": 10
-        }
-      ],
-      "reported_load_lb": 70,
-      "load_scope": "por lado + barra (peso de barra no informado)",
-      "reported_sets": 4,
-      "record_status": "repeticiones_confirmadas_carga_total_incompleta",
-      "rir": null,
-      "notes": "Sentadilla con barra: 70 lb por lado más barra de peso no especificado. No se calcula carga total ni tonelaje hasta saber peso de barra. Después de cada serie, 10 sentadillas profundas sin peso.",
-      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026"
-    },
-    {
       "id": "2026-10-13|s4-d2-f25",
       "date": "2026-10-13",
       "week": 4,
@@ -339,6 +306,40 @@
         "date": null,
         "source": "progreso destacado en resumen"
       }
+    },
+    {
+      "id": "2026-10-13|s4-d2-f24",
+      "date": "2026-10-13",
+      "week": 4,
+      "day": 2,
+      "exercise_id": "s4-d2-f24",
+      "exercise": "Sentadilla libre",
+      "sets": [
+        {
+          "kg": null,
+          "reps": 10
+        },
+        {
+          "kg": null,
+          "reps": 10
+        },
+        {
+          "kg": null,
+          "reps": 10
+        },
+        {
+          "kg": null,
+          "reps": 10
+        }
+      ],
+      "reported_load_lb": 70,
+      "load_scope": "por lado + barra (peso de barra no informado)",
+      "reported_sets": 4,
+      "record_status": "repeticiones_confirmadas_carga_total_incompleta",
+      "rir": null,
+      "notes": "Después de cada serie hice 10 sentadillas profundas sin peso",
+      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026",
+      "saved_at": "2026-10-13T22:35:40.729371+00:00"
     }
   ]
 }
