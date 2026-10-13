@@ -278,6 +278,38 @@ def fmt(v, decimal: int = 2) -> str:
     return f"{float(v):,.{decimal}f}".replace(",", "·").replace(".", ",").replace("·", ".")
 
 
+def weekly_report_weight(exercise: dict, unit: str = "lb") -> tuple[str, str] | None:
+    """Carga declarada en el seguimiento de ESA semana, sin heredar otra semana."""
+    report = exercise.get("weekly_report")
+    if not isinstance(report, dict):
+        return None
+    factor = 1.0 if unit == "lb" else 0.45359237
+    sequence = report.get("series_lb")
+    try:
+        if isinstance(sequence, list) and sequence:
+            values = [float(v) for v in sequence]
+        elif report.get("lb") is not None:
+            values = [float(report["lb"])]
+        else:
+            return None
+        if not values or any(not math.isfinite(v) or v < 0 for v in values):
+            return None
+    except (TypeError, ValueError):
+        return None
+    amounts = " / ".join(fmt(v * factor, 1).removesuffix(",0") for v in values)
+    scope = str(report.get("scope", "")).strip()
+    label = f"{amounts} {unit}" + (f" · {scope}" if scope else "")
+    raw_date = str(report.get("date", ""))
+    try:
+        shown_date = date.fromisoformat(raw_date).strftime("%d/%m/%Y")
+    except ValueError:
+        shown_date = "fecha no indicada"
+    context = f"Seguimiento registrado · {shown_date}"
+    if len(values) > 1:
+        context += f" · máximo {fmt(max(values) * factor, 1).removesuffix(',0')} {unit}"
+    return label, context
+
+
 def plot_layout(fig, height=370):
     fig.update_layout(
         height=height,
@@ -369,11 +401,6 @@ with tabs[0]:
         day = st.selectbox("DÍA", [1, 2, 3, 4, 5],
                           format_func=lambda x: f"Día {x} · {DAY_NAMES[x-1]}")
     chosen = [r for r in PLAN if int(r["week"]) == week and int(r["day"]) == day]
-    week_one_references = {
-        r["exercise"].strip().casefold(): r
-        for r in PLAN if r["week"] == 1 and (r.get("reference_weight_lb") is not None
-                                              or r.get("reference_series_kg"))
-    }
     st.markdown(
         f'<div class="finish"><div class="mini-title">TU SESIÓN</div>'
         f'<h3 style="margin:3px 0 4px">SEMANA {week} · {DAY_NAMES[day-1].upper()}</h3>'
@@ -413,22 +440,21 @@ with tabs[0]:
                     st.caption(f"**Bloque:** {ex['block']}")
                 if ex.get("notes"):
                     st.write(f"**Indicaciones:** {ex['notes']}")
-                ref = ex if week == 1 else week_one_references.get(ex["exercise"].strip().casefold())
-                if ref:
-                    if ref.get("reference_series_kg"):
-                        string = " · ".join(f"{fmt(w)} kg" for w in ref["reference_series_kg"])
-                        maximum = max(ref["reference_series_kg"])
-                        st.info(
-                            f"Cargas utilizadas el último mes (Excel), por serie: {string}. "
-                            f"Máximo: {fmt(maximum)} kg."
-                        )
-                    elif ref.get("reference_weight_lb") is not None:
-                        st.info(
-                            f"Máximo utilizado el último mes (Excel): "
-                            f"{fmt(ref.get('reference_weight_lb'))} lb "
-                            f"≈ {fmt(ref.get('reference_weight_kg'))} kg. "
-                            "Referencia histórica; no es un entrenamiento nuevo registrado en la app."
-                        )
+                report_load = weekly_report_weight(ex, "lb")
+                if report_load:
+                    load_text, load_context = report_load
+                    st.info(f"**Carga de semana {week}:** {load_text}. {load_context}.")
+                elif week == 1 and ex.get("reference_series_kg"):
+                    string = " · ".join(f"{fmt(w, 1)} kg" for w in ex["reference_series_kg"])
+                    st.info(f"Referencia inicial del Excel (semana 1): {string}.")
+                elif week == 1 and ex.get("reference_weight_lb") is not None:
+                    st.info(
+                        f"Referencia inicial del Excel (semana 1): "
+                        f"{fmt(ex.get('reference_weight_lb'), 1)} lb "
+                        f"≈ {fmt(ex.get('reference_weight_kg'), 1)} kg."
+                    )
+                else:
+                    st.caption("Carga de esta semana: todavía no confirmada en el seguimiento.")
                 recorded = [
                     r for r in SESSIONS if r.get("exercise_id") == ex["id"]
                 ]
@@ -442,9 +468,10 @@ with tabs[0]:
     
     st.markdown("")
     st.caption(
-        "Plan original de cuatro semanas. Los pesos del Excel son los máximos utilizados "
-        "durante el último mes de entrenamiento, según lo informado por Edu. "
-        "Son referencias históricas sin fechas individuales, no registros nuevos de la app."
+        "Las cargas reportadas en el seguimiento se muestran en su semana correspondiente. "
+        "El Excel original se conserva como referencia inicial; no se copian automáticamente "
+        "pesos de semana 1 a las semanas siguientes. Los reportes históricos no son "
+        "sesiones nuevas registradas en la app."
     )
 
 with tabs[1]:
@@ -467,13 +494,6 @@ with tabs[1]:
         x for x in PLAN
         if int(x["week"]) == summary_week and int(x["day"]) == summary_day
     ]
-    week1_refs = {
-        x["exercise"].strip().casefold(): x for x in PLAN
-        if int(x["week"]) == 1 and (
-            x.get("reference_weight_kg") is not None
-            or x.get("reference_series_kg")
-        )
-    }
     last_by_exercise = {}
     for record in SESSIONS:
         if not isinstance(record, dict):
@@ -487,33 +507,22 @@ with tabs[1]:
             last_by_exercise[exercise_id] = record
 
     def quick_weight_text(exercise):
-        ref = exercise if (
-            exercise.get("reference_weight_kg") is not None
-            or exercise.get("reference_series_kg")
-        ) else week1_refs.get(exercise["exercise"].strip().casefold())
-        if not ref:
-            return "—", "Sin peso de referencia"
+        weekly = weekly_report_weight(exercise, summary_unit)
+        if weekly:
+            return weekly
+        # El Excel trae cargas iniciales en semana 1. No extenderlas a otras semanas.
+        if summary_week != 1:
+            return "—", "Sin carga confirmada para esta semana"
+        ref = exercise
         scale = 1 if summary_unit == "kg" else 1 / 0.45359237
         sequence = ref.get("reference_series_kg")
         if isinstance(sequence, list) and sequence:
             amounts = [fmt(float(value) * scale, 1) for value in sequence]
-            weight_label = " / ".join(amounts) + " " + summary_unit
-        else:
-            amount = ref.get("reference_weight_kg")
-            if amount is None:
-                return "—", "Sin peso de referencia"
-            number = float(amount)
-            if number == 0:
-                weight_label = "0 " + summary_unit
-            else:
-                weight_label = fmt(number * scale, 1) + " " + summary_unit
-        if isinstance(sequence, list) and sequence:
-            source_label = "Último mes (Excel) · máximo: " + fmt(max(sequence) * scale, 1) + " " + summary_unit
-        else:
-            source_label = "Máximo del último mes · Excel"
-        if int(ref.get("week", 1)) != summary_week:
-            source_label += " · referencia sem. 1"
-        return weight_label, source_label
+            return " / ".join(amounts) + " " + summary_unit, "Base Excel · semana 1 (sin fecha)"
+        amount = ref.get("reference_weight_kg")
+        if amount is None:
+            return "—", "Sin carga confirmada para esta semana"
+        return fmt(float(amount) * scale, 1) + " " + summary_unit, "Base Excel · semana 1 (sin fecha)"
 
     def quick_recent(exercise):
         record = last_by_exercise.get(exercise["id"])
@@ -602,11 +611,10 @@ with tabs[1]:
     if HISTORY.get("_offline"):
         st.warning("No se pudo actualizar el historial: pueden faltar los últimos pesos reales.")
     st.caption(
-        "Los pesos del Excel son tus máximos utilizados el último mes, según tu aclaración: "
-        "sirven como referencia y no son registros nuevos de entrenamiento. "
-        "Las cargas históricas por serie aparecen por separado cuando existen. "
-        "«Último real» identifica los entrenamientos guardados en esta app. "
-        "Un guion significa que falta un peso de referencia."
+        "Los pesos del seguimiento se muestran en la semana en que los reportaste, "
+        "con su fecha y su unidad (por lado, mancuerna o máquina). "
+        "Cuando no existe una carga confirmada aparece «—», sin copiar semana 1. "
+        "«Último real» corresponde exclusivamente a sesiones guardadas en esta aplicación."
     )
 
 
