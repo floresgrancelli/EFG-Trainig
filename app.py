@@ -1440,7 +1440,12 @@ with tabs[7]:
                     help="Podés registrar más o menos series que las programadas "
                          "sin modificar la rutina original.",
                 )
-                reps_plan = suggested_reps(ex["repetitions"], series_count)
+                # Mantener el esquema previsto (p. ej., 12-10-8-8)
+                # aunque el registro tenga más o menos series.
+                reps_plan = suggested_reps(ex["repetitions"], planned_count)
+                if series_count > len(reps_plan):
+                    reps_plan.extend([reps_plan[-1]] * (series_count - len(reps_plan)))
+                reps_plan = reps_plan[:series_count]
                 st.caption(
                     f"Plan: {ex['series']} series · {ex['repetitions']} repeticiones "
                     f"· {ex['intensity'] or 'sin RIR indicado'} "
@@ -1492,7 +1497,8 @@ with tabs[7]:
                             loaded = st.number_input(
                                 f"Carga ({units}) · S{i+1}", 0.0, 1500.0,
                                 value=round(weight,2), step=2.5,
-                                disabled=missing_load,
+                                help="Si marcás «Carga total pendiente», este valor "
+                                     "no se guardará hasta que confirmes la carga real.",
                                 key=f"weight_{ex['id']}_{edit_date.isoformat()}_{units}_{i}",
                             )
                         with c:
