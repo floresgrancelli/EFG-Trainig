@@ -707,8 +707,306 @@ with tabs[2]:
         render_calendar(SESSIONS)
 
 with tabs[3]:
-    st.markdown("### 📚 Registro público de sesiones")
-    st.caption("Cada sesión guardada por el administrador aparece para todos.")
+    st.markdown("### 📚 Historial y evolución de fuerza")
+    st.caption(
+        "Dos fuentes claramente separadas: máximos del último mes importados del Excel "
+        "y entrenamientos reales guardados desde EFG Training."
+    )
+
+    # Estos pesos son máximos históricos informados por Edu, no sesiones fechadas.
+    historic = []
+    for ex in PLAN:
+        if int(ex.get("week", 0)) != 1:
+            continue
+        raw_sequence = ex.get("reference_series_kg")
+        valid_sequence = []
+        if isinstance(raw_sequence, list):
+            for amount in raw_sequence:
+                try:
+                    number = float(amount)
+                    if math.isfinite(number) and number >= 0:
+                        valid_sequence.append(number)
+                except (ValueError, TypeError):
+                    continue
+        if valid_sequence:
+            historic_max = max(valid_sequence)
+        else:
+            try:
+                raw_max = ex.get("reference_weight_kg")
+                historic_max = float(raw_max) if raw_max is not None else None
+                if historic_max is not None and (not math.isfinite(historic_max) or historic_max < 0):
+                    historic_max = None
+            except (ValueError, TypeError):
+                historic_max = None
+        if historic_max is None:
+            continue
+        historic.append({
+            "exercise": str(ex.get("exercise", "")).strip(),
+            "day": int(ex["day"]),
+            "pattern": str(ex.get("pattern", "")),
+            "set_type": str(ex.get("set_type", "individual")),
+            "sets": str(ex.get("series", "")),
+            "reps": str(ex.get("repetitions", "")),
+            "max_kg": historic_max,
+            "per_set": valid_sequence,
+        })
+
+    st.markdown("#### 📌 Máximos utilizados el mes anterior")
+    st.caption(
+        "Proceden del Excel original. No tienen fecha individual y NO cuentan como "
+        "entrenamientos realizados en la aplicación."
+    )
+    historical_by_exercise = {}
+    for item in historic:
+        normalized = item["exercise"].casefold()
+        historical_by_exercise[normalized] = max(
+            item["max_kg"], historical_by_exercise.get(normalized, 0.0)
+        )
+    a, b, c = st.columns(3)
+    a.metric("Ejercicios con referencia", len(historic))
+    b.metric("Sesiones guardadas", len([x for x in SESSIONS if isinstance(x, dict)]))
+    c.metric("Ejercicios con sesiones", len({
+        str(x.get("exercise", "")).strip().casefold()
+        for x in SESSIONS if isinstance(x, dict) and x.get("exercise")
+    }))
+
+    ref_table = []
+    for ex in historic:
+        ref_table.append({
+            "Día": DAY_NAMES[ex["day"] - 1],
+            "Ejercicio": ex["exercise"],
+            "Bloque": (
+                "Triserie" if ex["set_type"] == "triserie"
+                else "Superserie" if ex["set_type"] == "superserie"
+                else "Individual"
+            ),
+            "Series": ex["sets"],
+            "Repeticiones": ex["reps"],
+            "Máximo (lb)": round(ex["max_kg"] / 0.45359237, 1),
+            "Máximo (kg)": round(ex["max_kg"], 2),
+            "Cargas por serie (lb)": (
+                " · ".join(fmt(v / 0.45359237, 1) for v in ex["per_set"])
+                if ex["per_set"] else "—"
+            ),
+        })
+    if ref_table:
+        st.dataframe(
+            pd.DataFrame(ref_table), use_container_width=True,
+            hide_index=True, height=340,
+        )
+        st.download_button(
+            "⬇️ Descargar máximos del mes anterior (CSV)",
+            pd.DataFrame(ref_table).to_csv(index=False).encode("utf-8-sig"),
+            "efg_training_maximos_mes_anterior.csv", "text/csv",
+        )
+        st.markdown("##### Comparación visual por día")
+        historic_day = st.selectbox(
+            "Día de entrenamiento", list(range(1, 6)),
+            format_func=lambda d: DAY_NAMES[d - 1],
+            key="history_reference_day",
+        )
+        chosen_refs = [ex for ex in historic if ex["day"] == historic_day]
+        if chosen_refs:
+            ref_chart = go.Figure(go.Bar(
+                x=[r["max_kg"] for r in chosen_refs],
+                y=[r["exercise"] for r in chosen_refs],
+                orientation="h",
+                marker=dict(
+                    color=[
+                        CYAN if r["set_type"] == "triserie"
+                        else PINK if r["set_type"] == "superserie" else PURPLE
+                        for r in chosen_refs
+                    ],
+                    line=dict(width=0),
+                ),
+                text=[fmt(r["max_kg"], 1) + " kg" for r in chosen_refs],
+                textposition="outside",
+                hovertemplate="%{y}: %{x:.2f} kg<extra>Mes anterior · Excel</extra>",
+            ))
+            ref_chart.update_layout(
+                yaxis=dict(autorange="reversed"),
+                xaxis_title="Carga externa máxima (kg)",
+                margin=dict(l=10, r=35, t=20, b=35),
+            )
+            st.plotly_chart(
+                plot_layout(ref_chart, max(310, 42 * len(chosen_refs))),
+                use_container_width=True,
+                config={"displayModeBar": False},
+            )
+            st.caption(
+                "Visualización descriptiva: las cargas de máquinas y ejercicios diferentes "
+                "no son comparables como una medida de rendimiento general."
+            )
+
+    st.divider()
+    st.markdown("#### 📈 Gráfico de evolución por ejercicio")
+    st.caption(
+        "Elegí un ejercicio para ver su propio gráfico. La línea utiliza las fechas reales "
+        "de cada sesión; la referencia del Excel nunca se coloca en una fecha inventada."
+    )
+    exercise_names = {
+        str(x.get("exercise", "")).strip() for x in PLAN
+        if str(x.get("exercise", "")).strip()
+    }
+    exercise_names.update(
+        str(x.get("exercise", "")).strip() for x in SESSIONS
+        if isinstance(x, dict) and str(x.get("exercise", "")).strip()
+    )
+    exercise_options = sorted(exercise_names, key=str.casefold)
+    if exercise_options:
+        default_ex = "Sit ups con disco"
+        default_index = exercise_options.index(default_ex) if default_ex in exercise_options else 0
+        chosen_name = st.selectbox(
+            "Seleccioná el ejercicio", exercise_options,
+            index=default_index, key="history_exercise_chart",
+        )
+        chosen_key = chosen_name.casefold()
+        baseline = historical_by_exercise.get(chosen_key)
+
+        # Resumir únicamente cargas reales, con fecha, para el movimiento elegido.
+        dated = {}
+        for session in SESSIONS:
+            if not isinstance(session, dict):
+                continue
+            if str(session.get("exercise", "")).strip().casefold() != chosen_key:
+                continue
+            try:
+                real_date = date.fromisoformat(str(session.get("date", "")))
+            except (ValueError, TypeError):
+                continue
+            valid_sets = []
+            for series in session.get("sets", []):
+                if not isinstance(series, dict):
+                    continue
+                try:
+                    load = float(series.get("kg", 0))
+                    reps = int(series.get("reps", 0))
+                except (ValueError, TypeError):
+                    continue
+                if math.isfinite(load) and 0 <= load <= 1500 and 0 <= reps <= 10000:
+                    valid_sets.append((load, reps))
+            if not valid_sets:
+                continue
+            if real_date not in dated:
+                dated[real_date] = {"max_kg": 0.0, "volume": 0.0, "reps": 0, "sets": 0}
+            dated[real_date]["max_kg"] = max(
+                dated[real_date]["max_kg"], max(x[0] for x in valid_sets)
+            )
+            dated[real_date]["volume"] += sum(x[0] * x[1] for x in valid_sets)
+            dated[real_date]["reps"] += sum(x[1] for x in valid_sets)
+            dated[real_date]["sets"] += len(valid_sets)
+
+        history_dates = sorted(dated)
+        last_real = dated[history_dates[-1]]["max_kg"] if history_dates else None
+        m1, m2, m3 = st.columns(3)
+        m1.metric(
+            "Máximo mes anterior",
+            f"{fmt(baseline, 1)} kg" if baseline is not None else "—",
+        )
+        m2.metric(
+            "Última carga real",
+            f"{fmt(last_real, 1)} kg" if last_real is not None else "—",
+        )
+        m3.metric(
+            "Diferencia respecto al mes anterior",
+            f"{last_real - baseline:+.1f} kg"
+            if last_real is not None and baseline is not None else "—",
+        )
+
+        if history_dates:
+            selected_metric = st.radio(
+                "Indicador del gráfico",
+                ["Carga máxima", "Volumen", "Repeticiones"],
+                horizontal=True, key="history_chart_metric",
+            )
+            metric_key = {
+                "Carga máxima": "max_kg",
+                "Volumen": "volume",
+                "Repeticiones": "reps",
+            }[selected_metric]
+            x_dates = history_dates
+            y_values = [dated[d][metric_key] for d in x_dates]
+            chart = go.Figure()
+            if selected_metric == "Volumen":
+                chart.add_trace(go.Bar(
+                    x=x_dates, y=y_values, marker_color=PURPLE,
+                    hovertemplate="%{x|%d/%m/%Y}<br>%{y:.1f} kg·rep<extra></extra>",
+                ))
+            else:
+                chart.add_trace(go.Scatter(
+                    x=x_dates, y=y_values, mode="lines+markers",
+                    line=dict(color=PINK, width=3),
+                    marker=dict(size=11, color=PURPLE, line=dict(color="#FFFFFF", width=1)),
+                    hovertemplate=(
+                        "%{x|%d/%m/%Y}<br>%{y:.2f} kg<extra></extra>"
+                        if metric_key == "max_kg" else
+                        "%{x|%d/%m/%Y}<br>%{y:.0f} repeticiones<extra></extra>"
+                    ),
+                ))
+            if selected_metric == "Carga máxima" and baseline is not None:
+                chart.add_hline(
+                    y=baseline, line_color=CYAN, line_width=2,
+                    line_dash="dash", annotation_text="Máximo mes anterior (sin fecha)",
+                    annotation_position="top left",
+                    annotation_font_color=CYAN,
+                )
+            chart.update_layout(
+                yaxis_title={
+                    "Carga máxima": "Carga máxima por sesión (kg)",
+                    "Volumen": "kg × repeticiones",
+                    "Repeticiones": "Repeticiones totales",
+                }[selected_metric],
+                xaxis=dict(type="date", tickformat="%d/%m/%y"),
+                margin=dict(l=10, r=20, t=45, b=35),
+            )
+            st.plotly_chart(
+                plot_layout(chart, 365), use_container_width=True,
+                config={"displayModeBar": False},
+            )
+            detail_rows = [
+                {
+                    "Fecha": day_record,
+                    "Máximo (kg)": round(dated[day_record]["max_kg"], 2),
+                    "Series": dated[day_record]["sets"],
+                    "Repeticiones": dated[day_record]["reps"],
+                    "Volumen (kg·rep)": round(dated[day_record]["volume"], 1),
+                }
+                for day_record in reversed(history_dates)
+            ]
+            st.dataframe(
+                pd.DataFrame(detail_rows), use_container_width=True, hide_index=True,
+                column_config={"Fecha": st.column_config.DateColumn("Fecha", format="DD/MM/YYYY")},
+            )
+            st.caption(
+                "El máximo es la carga externa mayor de esa sesión, no una estimación de 1RM. "
+                "Volumen = kg × repeticiones; compará el mismo movimiento y equipamiento."
+            )
+        elif baseline is not None:
+            # El Excel tiene referencias sin fechas. Representamos una barra, NO una tendencia falsa.
+            figure = go.Figure(go.Bar(
+                x=["Mes anterior · Excel (sin fecha exacta)"], y=[baseline],
+                marker_color=CYAN,
+                text=[fmt(baseline, 1) + " kg"], textposition="outside",
+                hovertemplate="Referencia histórica: %{y:.2f} kg<extra></extra>",
+            ))
+            figure.update_layout(yaxis_title="Carga máxima (kg)")
+            st.plotly_chart(
+                plot_layout(figure, 310), use_container_width=True,
+                config={"displayModeBar": False},
+            )
+            st.info(
+                "Este ejercicio ya tiene su punto de referencia histórico. "
+                "La evolución con fechas se dibujará al guardar el primer entrenamiento desde ADMIN."
+            )
+        else:
+            st.info(
+                "Este ejercicio está en el plan, pero no tiene una carga histórica conocida "
+                "ni sesiones reales guardadas. Su gráfico aparecerá cuando registres datos."
+            )
+
+    st.divider()
+    st.markdown("#### 🗂️ Sesiones realmente registradas")
+    st.caption("Cada entrenamiento guardado desde el administrador aparece aquí para todos.")
     if DF.empty:
         st.info("Aún no se cargaron entrenamientos realizados. La rutina y sus pesos de referencia están en Mi rutina.")
     else:
