@@ -54,6 +54,14 @@ Con el PIN correcto, la pestaña **ADMIN** permite:
 
 Cada modificación se registra como commit. El público puede consultar la rutina y el historial, pero no puede escribir sin el token privado. Los gráficos de sesiones reales se generan con sesiones **reales**, sin convertir referencias del Excel en entrenamientos inventados.
 
+## Temporizador de descansos
+
+- Nueva pestaña **⏱️ TEMPORIZADOR** para utilizar desde iPhone o Mac durante la rutina.
+- Tres descansos predefinidos: **3:00**, **2:00** y **1:30** minutos.
+- Botones **Iniciar / Continuar**, **Pausar** y **Reiniciar**; círculo de progreso y señal sonora/vibración cuando el navegador lo permita.
+- Cuenta atrás basada en la hora real, por lo que se recalcula aunque el navegador limite la actualización en segundo plano. El aviso sonoro **no está garantizado** con iPhone bloqueado.
+- El contador se ejecuta en el navegador y no guarda ni publica información de salud.
+
 ## Evolución por repeticiones a igual carga
 
 - En **PROGRESO**, seleccioná un ejercicio y una carga fija: el gráfico muestra la serie con mayor número de repeticiones registrada **en cada fecha con esa carga**.
