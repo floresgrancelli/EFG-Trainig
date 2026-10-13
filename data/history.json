@@ -148,41 +148,6 @@
       "source": "Resumen de entrenamiento enviado en capturas 13/10/2026"
     },
     {
-      "id": "2026-10-13|s4-d2-f27",
-      "date": "2026-10-13",
-      "week": 4,
-      "day": 2,
-      "exercise_id": "s4-d2-f27",
-      "exercise": "Extension de cuadriceps",
-      "sets": [
-        {
-          "kg": null,
-          "reps": 12
-        },
-        {
-          "kg": null,
-          "reps": 10
-        },
-        {
-          "kg": null,
-          "reps": 8
-        },
-        {
-          "kg": 106.594,
-          "reps": 8,
-          "load_lb": 235,
-          "load_scope": "maquina: última serie"
-        }
-      ],
-      "reported_load_lb": 235,
-      "load_scope": "máquina; carga progresiva, solo última serie confirmada 235 lb",
-      "reported_sets": 4,
-      "record_status": "repeticiones_confirmadas_cargas_anteriores_pendientes",
-      "rir": null,
-      "notes": "4 series progresivas: 12, 10, 8, 8 repeticiones. Solo se conoce la última carga de 235 lb. No se inventan las primeras tres cargas. Superserie con aductores (según rutina original).",
-      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026"
-    },
-    {
       "id": "2026-10-13|s4-d2-f28",
       "date": "2026-10-13",
       "week": 4,
@@ -342,6 +307,41 @@
       "notes": "",
       "source": "Resumen de entrenamiento enviado en capturas 13/10/2026",
       "saved_at": "2026-10-13T23:22:33.792471+00:00"
+    },
+    {
+      "id": "2026-10-13|s4-d2-f27",
+      "date": "2026-10-13",
+      "week": 4,
+      "day": 2,
+      "exercise_id": "s4-d2-f27",
+      "exercise": "Extension de cuadriceps",
+      "sets": [
+        {
+          "kg": null,
+          "reps": 12
+        },
+        {
+          "kg": null,
+          "reps": 10
+        },
+        {
+          "kg": null,
+          "reps": 8
+        },
+        {
+          "kg": null,
+          "reps": 8,
+          "load_scope": "maquina: última serie"
+        }
+      ],
+      "reported_load_lb": 235,
+      "load_scope": "máquina; carga progresiva, solo última serie confirmada 235 lb",
+      "reported_sets": 4,
+      "record_status": "repeticiones_confirmadas_cargas_anteriores_pendientes",
+      "rir": 2,
+      "notes": "",
+      "source": "Resumen de entrenamiento enviado en capturas 13/10/2026",
+      "saved_at": "2026-10-13T23:23:50.832558+00:00"
     }
   ]
 }
