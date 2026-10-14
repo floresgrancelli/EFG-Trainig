@@ -52,6 +52,67 @@ def _summary_rows(workouts: list[dict]) -> list[dict]:
     return sorted(rows, key=lambda row: (row["Fecha"], row["Hora"]))
 
 
+def render_day_watch_summary(
+    workouts: list[dict], plan_week: int, plan_day: int
+) -> None:
+    """Resumen Apple Watch asociado a la semana y al día de entrenamiento.
+
+    Los datos de Apple Watch se muestran separados de las cargas y series.
+    No se inventa una sesión de fuerza si aún no se registraron sus ejercicios.
+    """
+    day_items = []
+    for record in workouts:
+        if not isinstance(record, dict):
+            continue
+        try:
+            if (int(record.get("plan_week", -1)) == plan_week
+                    and int(record.get("plan_day", -1)) == plan_day
+                    and int(record.get("duration_seconds", 0)) > 0):
+                date.fromisoformat(str(record.get("date", "")))
+                day_items.append(record)
+        except (TypeError, ValueError):
+            continue
+    if not day_items:
+        return
+    day_items.sort(key=lambda record: (str(record.get("date", "")),
+                                      str(record.get("start_time", ""))))
+    for item in day_items:
+        day = date.fromisoformat(str(item["date"]))
+        start = str(item.get("start_time", ""))
+        end = str(item.get("end_time", ""))
+        hour_label = f"{start}–{end}" if end else start
+        st.markdown("#### ⌚ Apple Watch · Sesión registrada")
+        st.caption(
+            f"{day.strftime('%d/%m/%Y')} · {hour_label} · "
+            f"{item.get('activity', 'Entrenamiento')} · Datos de Apple Fitness"
+        )
+        a, b = st.columns(2)
+        a.metric("Duración", _duration(item.get("duration_seconds", 0)))
+        b.metric("FC media", f"{int(item.get('avg_hr_bpm', 0))} lpm")
+        c, d = st.columns(2)
+        c.metric("Kcal activas (estimadas)", str(item.get("active_kcal", "—")))
+        d.metric("Kcal totales (estimadas)", str(item.get("total_kcal", "—")))
+        zones = item.get("hr_zones_seconds", {})
+        if isinstance(zones, dict) and zones:
+            st.caption(
+                f"Zonas cardíacas: Z1 {_duration(zones.get('z1', 0))} · "
+                f"Z2 {_duration(zones.get('z2', 0))} · "
+                f"Z3–Z5: {_duration(sum(int(zones.get(f'z{i}', 0)) for i in (3, 4, 5)))}."
+            )
+        recovery = item.get("post_workout_hr_bpm")
+        if isinstance(recovery, dict):
+            st.caption(
+                f"Recuperación de FC: al terminar {recovery.get('at_end', '—')} lpm "
+                f"· al minuto {recovery.get('minute_1', '—')} lpm "
+                f"· a los 2 minutos {recovery.get('minute_2', '—')} lpm."
+            )
+        st.caption(
+            "Los datos del reloj corresponden a esta fecha. "
+            "Las series, repeticiones y cargas se guardan por separado "
+            "en el registro de entrenamiento."
+        )
+
+
 def render_watch_dashboard(
     workouts: list[dict],
     *,
@@ -138,6 +199,21 @@ def render_watch_dashboard(
         )
     else:
         st.info("Esta sesión no tiene tiempo por zona registrado.")
+
+    latest_recovery = next(
+        (record.get("post_workout_hr_bpm") for record in workouts
+         if isinstance(record, dict)
+         and record.get("date") == latest["Fecha"].isoformat()
+         and record.get("start_time") == latest["Hora"]),
+        None,
+    )
+    if isinstance(latest_recovery, dict):
+        st.markdown("#### ❤️ FC tras finalizar · última sesión")
+        e, f, g = st.columns(3)
+        e.metric("Al finalizar", f"{latest_recovery.get('at_end', '—')} lpm")
+        f.metric("Al minuto", f"{latest_recovery.get('minute_1', '—')} lpm")
+        g.metric("A los 2 minutos", f"{latest_recovery.get('minute_2', '—')} lpm")
+        st.caption("Lecturas de Apple Fitness; no constituyen una prueba de recuperación estandarizada.")
 
     st.markdown("#### 📅 Historial cronológico")
     visible = df.drop(columns=["Zonas", "Duración (min)"]).sort_values(
