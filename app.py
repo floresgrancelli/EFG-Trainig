@@ -341,6 +341,31 @@ def weekly_report_weight(exercise: dict, unit: str = "lb") -> tuple[str, str] | 
     return label, context
 
 
+def planned_load_text(exercise: dict, unit: str = "lb") -> str | None:
+    """Carga de REFERENCIA, no máximo real ni sesión efectivamente realizada."""
+    load = exercise.get("planned_load")
+    if not isinstance(load, dict):
+        return None
+    if load.get("kind") == "bodyweight":
+        return "Peso corporal"
+    try:
+        pounds = float(load["lb"])
+    except (KeyError, TypeError, ValueError):
+        return None
+    if not math.isfinite(pounds) or pounds < 0:
+        return None
+    value = pounds if unit == "lb" else pounds * 0.45359237
+    text = f"{fmt(value, 1).removesuffix(',0')} {unit}"
+    scope = load.get("scope")
+    if scope == "por_lado_y_barra":
+        return f"{text}/lado + barra"
+    if scope == "por_mancuerna":
+        return f"{text}/mancuerna"
+    if scope == "mancuernas_sin_desglosar":
+        return f"{text} · mancuernas*"
+    return text
+
+
 def monthly_maximum_weights(
     plan: list[dict], sessions: list[dict], as_of: date | None = None
 ) -> dict[str, dict]:
@@ -567,11 +592,9 @@ with tabs[0]:
         '<span class="efg-legend-item efg-legend-uni">OSCURO · Individual</span>'
         '</div>', unsafe_allow_html=True,
     )
-    if day == 3 and ((week - 1) % 4) + 1 in (2, 3, 4):
-        st.caption(
-            "Nota del Excel: en esta semana, el circuito abdominal del miércoles "
-            "solo tiene dos ejercicios; no figura el tercero."
-        )
+    if day == 3:
+        st.caption("Miércoles: rutina de referencia actualizada, 9 ejercicios. "
+                   "Las cargas son referencias del plan, no entrenamientos realizados.")
     for index, ex in enumerate(chosen, 1):
         kind = ex.get("set_type", "individual")
         if kind not in ("individual", "superserie", "triserie"):
@@ -592,8 +615,14 @@ with tabs[0]:
                     st.caption(f"**Bloque:** {ex['block']}")
                 if ex.get("notes"):
                     st.write(f"**Indicaciones:** {ex['notes']}")
+                planned_load = planned_load_text(ex, "lb")
                 report_load = weekly_report_weight(ex, "lb")
-                if report_load:
+                if planned_load is not None:
+                    st.info(
+                        f"**Carga de referencia:** {planned_load}. "
+                        "No corresponde a un registro de entrenamiento realizado."
+                    )
+                elif report_load:
                     load_text, load_context = report_load
                     st.info(f"**Carga de semana {week}:** {load_text}. {load_context}.")
                 elif week == 1 and ex.get("reference_series_kg"):
@@ -696,6 +725,11 @@ with tabs[1]:
         )
 
     def quick_weight_text(exercise):
+        # Miércoles: la referencia de la foto es el plan; no la confundimos
+        # con el máximo móvil que sigue calculándose para el resto de la app.
+        reference = planned_load_text(exercise, summary_unit)
+        if reference is not None:
+            return reference
         name = " ".join(str(exercise.get("exercise", "")).strip().casefold().split())
         peak = MONTHLY_MAX.get(name)
         if not peak:
@@ -714,7 +748,8 @@ with tabs[1]:
         f'<div class="finish" style="margin:12px 0 15px;padding:16px 20px">'
         f'<div class="mini-title">VISTA RÁPIDA · ENTRENAMIENTO</div>'
         f'<h3 style="margin:3px 0 4px">SEMANA {summary_week} · {DAY_NAMES[summary_day - 1].upper()}</h3>'
-        f'<div class="muted">{len(day_exercises)} ejercicios · máximos en {summary_unit}</div></div>',
+        f'<div class="muted">{len(day_exercises)} ejercicios · ' 
+        f'{"cargas de referencia" if summary_day == 3 else "máximos"} en {summary_unit}</div></div>',
         unsafe_allow_html=True,
     )
     st.caption(
@@ -753,7 +788,8 @@ with tabs[1]:
         html_parts.append(
             f'<section class="quick-group {kind}">'
             f'<div class="quick-group-title">{heading}</div>'
-            '<div class="quick-cols"><span>EJERCICIO</span><span>SERIES × REPS</span><span>PESO MÁX.</span></div>'
+            f'<div class="quick-cols"><span>EJERCICIO</span><span>SERIES × REPS</span>'
+            f'<span>{"PESO REF." if summary_day == 3 else "PESO MÁX."}</span></div>'
         )
         for position, exercise in group["items"]:
             ex_name = html_escape(str(exercise.get("exercise", "")))
@@ -773,19 +809,32 @@ with tabs[1]:
             )
         html_parts.append("</section>")
     st.markdown("".join(html_parts), unsafe_allow_html=True)
-    if summary_day == 3 and ((summary_week - 1) % 4) + 1 in (2, 3, 4):
-        st.caption("El Excel tiene solo dos ejercicios en el circuito abdominal del miércoles de esta semana.")
+    if summary_day == 3:
+        st.caption(
+            "MIÉRCOLES · Rutina de referencia actualizada: 9 ejercicios "
+            "en las 12 semanas. Los pesos mostrados son objetivos de referencia, "
+            "NO cargas máximas medidas ni sesiones realizadas."
+        )
     if HISTORY.get("_offline"):
         st.warning("No se pudo actualizar el historial: pueden faltar los últimos pesos reales.")
-    st.caption(
-        "PESO MÁX.: mayor carga comparable registrada en los últimos 30 días, "
-        "aunque en el último entrenamiento hayas usado menos. "
-        "Los pesos por lado se muestran por lado + barra, sin inventar el peso de la barra. "
-        "En mancuernas (*) no se presupone si la cifra es total o por mancuerna. "
-        "Las cargas confirmadas sin repeticiones también cuentan como referencia de peso. "
-        "Sin dato reciente se conserva la referencia inicial del Excel, sin fecha. "
-        "«—» significa que no hay carga registrada."
-    )
+    if summary_day == 3:
+        st.caption(
+            "PESO REF.: referencia aportada para la rutina del miércoles, no "
+            "resultado ni máximo real. En mancuernas (*) no se presupone si la "
+            "cifra es total o por mancuerna. En barra Z son libras por lado; "
+            "el peso de la barra no está informado. "
+            "Las series realizadas se muestran por separado al guardarlas."
+        )
+    else:
+        st.caption(
+            "PESO MÁX.: mayor carga comparable registrada en los últimos 30 días, "
+            "aunque en el último entrenamiento hayas usado menos. "
+            "Los pesos por lado se muestran por lado + barra, sin inventar el peso de la barra. "
+            "En mancuernas (*) no se presupone si la cifra es total o por mancuerna. "
+            "Las cargas confirmadas sin repeticiones también cuentan como referencia de peso. "
+            "Sin dato reciente se conserva la referencia inicial del Excel, sin fecha. "
+            "«—» significa que no hay carga registrada."
+        )
 
 
 with tabs[2]:
