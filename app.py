@@ -24,7 +24,7 @@ import streamlit as st
 import requests
 from visuals import render_plan_charts, render_calendar, render_weight_chart
 from timer import render_rest_timer
-from watch import render_watch_dashboard
+from watch import render_watch_dashboard, render_day_watch_summary
 from session_detail import render_session_detail
 
 st.set_page_config(
@@ -578,6 +578,7 @@ with tabs[0]:
         day = st.selectbox("DÍA", [1, 2, 3, 4, 5],
                           format_func=lambda x: f"Día {x} · {DAY_NAMES[x-1]}")
     chosen = [r for r in PLAN if int(r["week"]) == week and int(r["day"]) == day]
+    render_day_watch_summary(WATCH_WORKOUTS, week, day)
     st.markdown(
         f'<div class="finish"><div class="mini-title">TU SESIÓN</div>'
         f'<h3 style="margin:3px 0 4px">SEMANA {week} · {DAY_NAMES[day-1].upper()}</h3>'
@@ -675,6 +676,7 @@ with tabs[1]:
         x for x in PLAN
         if int(x["week"]) == summary_week and int(x["day"]) == summary_day
     ]
+    render_day_watch_summary(WATCH_WORKOUTS, summary_week, summary_day)
     # Resumen de ejercicios realmente cargados en esta semana/día.
     # La planificación sigue intacta; mostramos ambas versiones.
     completed_for_day = {}
