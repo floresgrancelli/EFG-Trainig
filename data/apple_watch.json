@@ -25,6 +25,41 @@
       "plan_week": 4,
       "plan_day": 2,
       "plan_day_label": "Martes"
+    },
+    {
+      "id": "2026-10-14|07:01",
+      "date": "2026-10-14",
+      "activity": "Entrenamiento tradicional de fuerza",
+      "start_time": "07:01",
+      "end_time": "07:52",
+      "duration_seconds": 3045,
+      "active_kcal": 244,
+      "total_kcal": 328,
+      "avg_hr_bpm": 106,
+      "hr_zones_seconds": {
+        "z1": 2901,
+        "z2": 63,
+        "z3": 0,
+        "z4": 0,
+        "z5": 0
+      },
+      "hr_zone_bands_bpm": {
+        "z1": "<131",
+        "z2": "132–143",
+        "z3": "144–154",
+        "z4": "155–166",
+        "z5": "167+"
+      },
+      "post_workout_hr_bpm": {
+        "at_end": 97,
+        "minute_1": 92,
+        "minute_2": 99
+      },
+      "source": "Apple Watch · Apple Fitness · capturas facilitadas el 14/10/2026",
+      "notes": "Las zonas registradas suman 49:24, menor que la duración total de 50:45; no se completaron tiempos faltantes ni se extrapoló el gráfico cardíaco.",
+      "plan_week": 4,
+      "plan_day": 3,
+      "plan_day_label": "Miércoles"
     }
   ]
 }
