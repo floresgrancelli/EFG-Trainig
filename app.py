@@ -24,7 +24,20 @@ import streamlit as st
 import requests
 from visuals import render_plan_charts, render_calendar, render_weight_chart
 from timer import render_rest_timer
-from watch import render_watch_dashboard, render_day_watch_summary
+# Módulo propio para evitar conflictos de importación en Streamlit Cloud.
+# Las métricas proceden de CAPTURAS transcritas manualmente: no existe una
+# conexión directa ni sincronización automática con Apple Watch.
+try:
+    from efg_watch_dashboard import render_watch_dashboard, render_day_watch_summary
+except ImportError:
+    def render_watch_dashboard(*args, **kwargs):
+        st.warning(
+            "Los registros de Apple Fitness cargados desde capturas "
+            "no están disponibles temporalmente. El resto de la app sigue operativo."
+        )
+
+    def render_day_watch_summary(*args, **kwargs):
+        return None
 from session_detail import render_session_detail
 
 st.set_page_config(
