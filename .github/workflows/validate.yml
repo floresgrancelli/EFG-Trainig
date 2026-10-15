@@ -95,3 +95,28 @@ jobs:
           assert isinstance(watch.get("workouts"), list)
           print("OK: rutina de 12 semanas, miércoles, historial y reloj")
           PY
+      - name: Verificar arranque de la app Streamlit sin datos externos
+        run: |
+          python -m pip install -q -r requirements.txt
+          python - <<'PY'
+          import base64
+          from pathlib import Path
+          from unittest.mock import patch
+          from streamlit.testing.v1 import AppTest
+
+          class LocalResponse:
+              def __init__(self, url):
+                  self.path = url.split("/contents/", 1)[-1]
+              def raise_for_status(self):
+                  return None
+              def json(self):
+                  content = Path(self.path).read_bytes()
+                  return {"content": base64.b64encode(content).decode("ascii"),
+                          "sha": "local-ci-check"}
+
+          with patch("requests.get", side_effect=lambda url, **kwargs: LocalResponse(url)):
+              app = AppTest.from_file("app.py", default_timeout=90).run()
+          issues = [str(x.message) for x in app.exception]
+          assert not issues, issues
+          print("OK: EFG Training arranca con el plan y el historial actual")
+          PY
