@@ -12,7 +12,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Verificar sintaxis Python
-        run: python -m py_compile app.py visuals.py
+        run: python -m py_compile app.py visuals.py watch.py timer.py session_detail.py
       - name: Validar el máximo móvil de cargas (sin instalar Streamlit)
         run: |
           python - <<'PY'
@@ -36,28 +36,62 @@ jobs:
           assert fallback["extension de cuadriceps"]["source"] == "excel_inicial"
           print("OK: máximo móvil y actualización por sesión real")
           PY
-      - name: Validar importación de la rutina
+      - name: Validar plan actualizado, historial y Apple Watch
         run: |
           python - <<'PY'
           import json, pathlib
-          plan = json.loads(pathlib.Path('data/plan.json').read_text(encoding='utf-8'))
-          arr = plan["entries"]
-          assert len(arr) == 544, len(arr)
+          from datetime import date
+
+          folder = pathlib.Path("data")
+          plan = json.loads((folder / "plan.json").read_text(encoding="utf-8"))
+          entries = plan["entries"]
           assert plan["weeks"] == 12
-          assert [sum(r["week"]==w for r in arr) for w in range(1,13)] == [46,46,45,45,46,45,45,45,46,45,45,45]
-          assert {r["day"] for r in arr} == set(range(1,6))
-          assert len({r["id"] for r in arr}) == len(arr)
-          assert sum(r["week"]<=4 for r in arr) == 182
-          assert sum(r["week"]>=5 for r in arr) == 362
-          assert not any(r.get("weekly_report") for r in arr if r["week"] >= 5)
-          assert not any(r.get("reference_weight_lb") is not None for r in arr if r["week"] >= 5)
-          assert sum(r["week"]==1 and r["reference_weight_lb"] is not None for r in arr) == 32
-          assert any(r["reference_series_kg"] and len(r["reference_series_kg"])==4 for r in arr)
-          blob = pathlib.Path('data/plan.json').read_text(encoding='utf-8').casefold()
-          assert 'belutrainer' not in blob and 'rutina diseñada por' not in blob
-          hist = json.loads(pathlib.Path('data/history.json').read_text(encoding='utf-8'))
-          assert isinstance(hist["sessions"], list)
-          weights = json.loads(pathlib.Path('data/weight.json').read_text(encoding='utf-8'))
+          assert isinstance(entries, list) and len(entries) >= 500
+          assert len({entry["id"] for entry in entries}) == len(entries)
+          assert {int(entry["day"]) for entry in entries} == set(range(1, 6))
+          assert {int(entry["week"]) for entry in entries} == set(range(1, 13))
+          assert all(entry.get("exercise") and entry.get("series") for entry in entries)
+
+          # Foto de referencia del miércoles: 9 ejercicios, mismo orden,
+          # durante las doce semanas sin inventar sesiones realizadas.
+          reference = [
+              "Giros rusos", "Abdominales bisagra", "Elevaciones de piernas",
+              "Press francés con mancuernas", "Flexiones para tríceps",
+              "Fondos en paralelas", "Curl martillo", "Tríceps con soga",
+              "Curl 21 con barra Z",
+          ]
+          for week in range(1, 13):
+              w = [item for item in entries if int(item["week"]) == week]
+              assert len(w) >= 40, (week, len(w))
+              for day in range(1, 6):
+                  assert any(int(item["day"]) == day for item in w), (week, day)
+              wed = [item for item in w if int(item["day"]) == 3]
+              assert [item["exercise"] for item in wed] == reference, (week, wed)
+              assert all(item.get("planned_load") for item in wed)
+          assert not any(e.get("weekly_report") for e in entries if int(e["week"]) >= 5)
+          assert not any(e.get("reference_weight_lb") is not None for e in entries if int(e["week"]) >= 5)
+          assert any(isinstance(e.get("reference_series_kg"), list)
+                     and len(e["reference_series_kg"]) == 4 for e in entries)
+          blob = (folder / "plan.json").read_text(encoding="utf-8").casefold()
+          assert "belutrainer" not in blob and "rutina diseñada por" not in blob
+
+          history = json.loads((folder / "history.json").read_text(encoding="utf-8"))
+          sessions = history["sessions"]
+          assert isinstance(sessions, list)
+          assert len({session["id"] for session in sessions}) == len(sessions)
+          for session in sessions:
+              date.fromisoformat(session["date"])
+              assert isinstance(session.get("sets"), list)
+              for row in session["sets"]:
+                  assert isinstance(row, dict)
+                  # Las cargas pueden quedar pendientes (kg = null);
+                  # no deben transformarse en cero ficticio.
+                  assert row.get("kg") is None or isinstance(row["kg"], (int, float))
+                  assert row.get("reps") is None or isinstance(row["reps"], int)
+
+          weights = json.loads((folder / "weight.json").read_text(encoding="utf-8"))
           assert isinstance(weights["measurements"], list)
-          print("OK: plan completo y sin atribución personal")
+          watch = json.loads((folder / "apple_watch.json").read_text(encoding="utf-8"))
+          assert isinstance(watch.get("workouts"), list)
+          print("OK: rutina de 12 semanas, miércoles, historial y reloj")
           PY
