@@ -81,7 +81,7 @@ def render_day_watch_summary(
         start = str(item.get("start_time", ""))
         end = str(item.get("end_time", ""))
         hour_label = f"{start}–{end}" if end else start
-        st.markdown("#### ⌚ Apple Watch · Sesión registrada")
+        st.markdown("#### ⌚ Apple Fitness · Captura registrada")
         st.caption(
             f"{day.strftime('%d/%m/%Y')} · {hour_label} · "
             f"{item.get('activity', 'Entrenamiento')} · Datos de Apple Fitness"
@@ -107,9 +107,9 @@ def render_day_watch_summary(
                 f"· a los 2 minutos {recovery.get('minute_2', '—')} lpm."
             )
         st.caption(
-            "Los datos del reloj corresponden a esta fecha. "
-            "Las series, repeticiones y cargas se guardan por separado "
-            "en el registro de entrenamiento."
+            "Datos cargados manualmente desde tus capturas de Apple Fitness, "
+            "sin conexión con el reloj. Las series, repeticiones y cargas "
+            "se guardan por separado en el registro de entrenamiento."
         )
 
 
@@ -119,10 +119,11 @@ def render_watch_dashboard(
     offline: bool = False,
     plot_layout=None,
 ) -> None:
-    st.markdown("### ⌚ Apple Watch · Rendimiento por fecha")
+    st.markdown("### ⌚ Apple Fitness · Datos de capturas")
     st.caption(
-        "Entrenamientos registrados desde las capturas de Apple Fitness. "
-        "Se ordenan por la fecha real de cada sesión."
+        "Datos transcritos manualmente de las capturas que compartiste. "
+        "EFG Training NO está conectada al Apple Watch ni sincroniza datos en tiempo real. "
+        "Se ordenan por la fecha real de cada entrenamiento."
     )
     if offline:
         st.warning("No se pudo actualizar el historial de Apple Watch desde GitHub.")
