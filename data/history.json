@@ -1465,6 +1465,49 @@
       ],
       "weather_celsius": 13,
       "humidity_percent": 93
+    },
+    {
+      "id": "2026-10-16|apple-watch-strength",
+      "date": "2026-10-16",
+      "week": 4,
+      "day": 5,
+      "activity": "Entrenamiento tradicional de fuerza",
+      "source": "Apple Watch (capturas del usuario)",
+      "start_time": "06:58",
+      "end_time": "07:50",
+      "duration_seconds": 3120,
+      "active_kcal": 228,
+      "total_kcal": 314,
+      "average_heart_rate_bpm": 103,
+      "heart_rate_zones": [
+        {
+          "zone": 1,
+          "seconds": 2977,
+          "range_bpm": "menos de 131"
+        },
+        {
+          "zone": 2,
+          "seconds": 61,
+          "range_bpm": "132-143"
+        },
+        {
+          "zone": 3,
+          "seconds": 0,
+          "range_bpm": "144-154"
+        },
+        {
+          "zone": 4,
+          "seconds": 0,
+          "range_bpm": "155-166"
+        },
+        {
+          "zone": 5,
+          "seconds": 0,
+          "range_bpm": "167 o más"
+        }
+      ],
+      "weather_celsius": 11,
+      "humidity_percent": 90
     }
   ]
 }
