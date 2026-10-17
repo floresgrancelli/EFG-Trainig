@@ -210,6 +210,7 @@ def secret(name: str) -> str:
 
 
 def fetch_remote(path: str, token: str = "") -> tuple[dict, str]:
+    token = token or secret("GITHUB_TOKEN")
     headers = {"Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"}
     if token:
         headers["Authorization"] = f"Bearer {token}"
@@ -231,8 +232,9 @@ def public_history() -> dict:
         result, _ = fetch_remote("data/history.json")
         return result if isinstance(result.get("sessions"), list) else {"sessions": []}
     except (requests.RequestException, ValueError, KeyError, TypeError):
-        # Nunca inventamos registros: si no es posible leerlos, lo indicamos.
-        return {"sessions": [], "_offline": True}
+        # La copia publicada contiene registros reales; nunca se reemplazan por datos inventados.
+        cached = json.loads((Path(__file__).resolve().parent / "data" / "history.json").read_text(encoding="utf-8"))
+        return dict(cached, _offline=True, _snapshot=True)
 
 
 @st.cache_data(ttl=45, show_spinner=False)
@@ -687,7 +689,7 @@ with tabs[1]:
     st.markdown("### 📋 Rutina resumen")
     render_summary(PLAN, SESSIONS, LEGACY_PLAN, prefix="quick")
     if HISTORY.get("_offline"):
-        st.warning("No se pudo actualizar el historial. Pueden faltar los últimos registros.")
+        st.warning("No se pudo actualizar el historial online. Se muestra la copia real incluida en la última publicación; pueden faltar registros posteriores.")
 
 
 with tabs[2]:
