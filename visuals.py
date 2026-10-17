@@ -54,6 +54,8 @@ def _category(text):
         "gemelo", "pierna",
     )):
         return "Piernas"
+    if any(x in t for x in ("espalda", "deltoides posterior")):
+        return "Tracción"
     if any(x in t for x in ("empuje", "triceps", "pecho", "deltoides")):
         return "Empuje"
     if any(x in t for x in ("traccion", "biceps", "dorsal")):
@@ -118,9 +120,9 @@ def render_plan_charts(plan):
         st.plotly_chart(_style(fig), use_container_width=True,
                         config={"displayModeBar": False})
     st.caption(
-        "Programa ampliado a 12 semanas con tres ciclos de cuatro semanas. "
+        "Bloque de hipertrofia de 12 semanas, sin cargas futuras asignadas. Las series incluyen core y movilidad. "
         "Las categorías son agrupaciones descriptivas "
-        "según el patrón de la planilla; no equivalen al trabajo muscular efectivo."
+        "según el patrón de cada ejercicio; no equivalen al trabajo muscular efectivo."
     )
 
 
