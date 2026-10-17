@@ -12,7 +12,9 @@ jobs:
         with:
           python-version: "3.11"
       - name: Verificar sintaxis Python
-        run: python -m py_compile app.py visuals.py watch.py timer.py session_detail.py
+        run: python -m py_compile app.py visuals.py watch.py timer.py session_detail.py new_blocks.py block_views.py
+      - name: Validar separación de bloques e identidad de ejercicios
+        run: python -m unittest -v test_blocks.py
       - name: Validar el máximo móvil de cargas (sin instalar Streamlit)
         run: |
           python - <<'PY'

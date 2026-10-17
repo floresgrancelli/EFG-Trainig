@@ -24,6 +24,8 @@ import streamlit as st
 import requests
 from visuals import render_plan_charts, render_calendar, render_weight_chart
 from timer import render_rest_timer
+from new_blocks import (ACTIVE_BLOCK_ID, LEGACY_BLOCK_ID, ACTIVE_TITLE, DAY_FOCUS, DAY_TIME, canonical_name, block_of, view_sessions, scope_key, last_and_best, format_load)
+from block_views import render_summary, render_archive, render_exercise_progress, render_legacy_reports
 # Módulo propio para evitar conflictos de importación en Streamlit Cloud.
 # Las métricas proceden de CAPTURAS transcritas manualmente: no existe una
 # conexión directa ni sincronización automática con Apple Watch.
@@ -288,7 +290,7 @@ def load_plan_local() -> list[dict]:
 
 
 @st.cache_data(ttl=45, show_spinner=False)
-def public_plan() -> list[dict]:
+def public_legacy_plan() -> list[dict]:
     """Mostrar el plan publicado en GitHub sin esperar a un redepliegue.
 
     Ante fallas de red, usar la última versión empaquetada con la app.
@@ -300,6 +302,17 @@ def public_plan() -> list[dict]:
     except (requests.RequestException, ValueError, KeyError, TypeError):
         pass
     return load_plan_local()
+
+
+@st.cache_data(ttl=45, show_spinner=False)
+def public_plan() -> list[dict]:
+    try:
+        data, _ = fetch_remote("data/active_plan.json")
+        if isinstance(data.get("entries"), list) and data["entries"]:
+            return data["entries"]
+    except (requests.RequestException, ValueError, KeyError, TypeError):
+        pass
+    return json.loads((Path(__file__).resolve().parent / "data" / "active_plan.json").read_text(encoding="utf-8"))["entries"]
 
 
 def parse_count(value: str, fallback: int = 3) -> int:
@@ -518,6 +531,10 @@ def series_rows(sessions):
         except ValueError:
             continue
         for pos, item in enumerate(session.get("sets", []), start=1):
+            if scope_key(item.get("load_scope") or session.get("load_scope", "")) not in ("Carga total externa", "Máquina o polea", "Disco"):
+                continue
+            if session.get("duration_unit") == "seconds" or session.get("exercise") == "Plancha común":
+                continue
             try:
                 weight = float(item.get("kg", 0))
                 reps = int(item.get("reps", 0))
@@ -527,6 +544,7 @@ def series_rows(sessions):
                 continue
             all_rows.append({
                 "Fecha": event_date,
+                "Bloque": block_of(session),
                 "Semana del plan": int(session.get("week", 0)),
                 "Día": DAY_NAMES[max(0, min(4, int(session.get("day", 1))-1))],
                 "Ejercicio": str(session.get("exercise", "Sin nombre")),
@@ -552,7 +570,9 @@ def announce(kicker, title, sub):
     )
 
 
+LEGACY_PLAN = public_legacy_plan()
 PLAN = public_plan()
+ALL_PLAN = LEGACY_PLAN + PLAN
 PLAN_WEEKS = sorted({int(row['week']) for row in PLAN})
 HISTORY = public_history()
 WEIGHT = public_weight()
@@ -560,21 +580,22 @@ WATCH = public_apple_watch()
 WATCH_WORKOUTS = WATCH.get("workouts", [])
 MEASUREMENTS = WEIGHT.get("measurements", [])
 SESSIONS = HISTORY.get("sessions", [])
-MONTHLY_MAX = monthly_maximum_weights(PLAN, SESSIONS)
-DF = series_rows(SESSIONS)
+MONTHLY_MAX = monthly_maximum_weights(ALL_PLAN, SESSIONS)
+DF = series_rows(view_sessions(SESSIONS))
 TOKEN = secret("GITHUB_TOKEN")
 ADMIN_PIN = secret("ADMIN_PIN")
 
 announce(
-    "EFG TRAINING  /  PERFORMANCE LAB  ·  V1.0",
+    "EFG TRAINING  /  PERFORMANCE LAB  ·  V2.0",
     "LA CIENCIA<br>TAMBIÉN ENTRENA.",
     "Fuerza, método y datos para medir cada avance.",
 )
 
-tabs = st.tabs(["⚡ MI RUTINA", "📋 RUTINA RESUMEN", "⏱️ TEMPORIZADOR", "📊 PROGRESO", "⌚ APPLE WATCH", "📚 HISTORIAL", "⚖️ PESO", "🔐 ADMIN"])
+tabs = st.tabs(["⚡ MI RUTINA", "📋 RUTINA RESUMEN", "⏱️ TEMPORIZADOR", "📊 PROGRESO", "⌚ APPLE WATCH", "📚 HISTORIAL", "⚖️ PESO", "🔐 ADMIN", "🗃️ RUTINAS ANTIGUAS"])
 
 with tabs[0]:
     st.markdown("### ⚡ Plan de entrenamiento")
+    st.caption(ACTIVE_TITLE + " · Nuevo bloque · Semana 1 independiente del plan anterior")
     a, b = st.columns(2)
     a.metric("Días de entrenamiento", "05")
     b.metric("Semanas planificadas", f"{len(PLAN_WEEKS):02d}")
@@ -586,7 +607,7 @@ with tabs[0]:
         day = st.selectbox("DÍA", [1, 2, 3, 4, 5],
                           format_func=lambda x: f"Día {x} · {DAY_NAMES[x-1]}")
     chosen = [r for r in PLAN if int(r["week"]) == week and int(r["day"]) == day]
-    render_day_watch_summary(WATCH_WORKOUTS, week, day)
+    st.caption(DAY_FOCUS[day] + " · Duración estimada: " + DAY_TIME[day])
     st.markdown(
         f'<div class="finish"><div class="mini-title">TU SESIÓN</div>'
         f'<h3 style="margin:3px 0 4px">SEMANA {week} · {DAY_NAMES[day-1].upper()}</h3>'
@@ -601,9 +622,7 @@ with tabs[0]:
         '<span class="efg-legend-item efg-legend-uni">OSCURO · Individual</span>'
         '</div>', unsafe_allow_html=True,
     )
-    if day == 3:
-        st.caption("Miércoles: rutina de referencia actualizada, 9 ejercicios. "
-                   "Las cargas son referencias del plan, no entrenamientos realizados.")
+    st.caption("Core y movilidad: 2 vueltas, 10–15 s entre ejercicios y 30 s entre vueltas. Después, aproximaciones progresivas. Principal: 3 × 8–12 a RIR 2.")
     for index, ex in enumerate(chosen, 1):
         kind = ex.get("set_type", "individual")
         if kind not in ("individual", "superserie", "triserie"):
@@ -618,6 +637,11 @@ with tabs[0]:
                 x.metric("Series", ex["series"] or "—")
                 y.metric("Repeticiones", ex["repetitions"] or "—")
                 z.metric("Esfuerzo", ex["intensity"] or "—")
+                st.caption("**Descanso:** " + ex.get("rest", "No indicado"))
+                last_load, best_load = last_and_best(SESSIONS, ex["exercise"])
+                if last_load:
+                    st.caption("**Última sesión:** " + format_load(last_load) + " · " + last_load["date"].strftime("%d/%m/%Y"))
+                    st.caption("**Mejor carga comparable:** " + format_load(best_load))
                 if ex.get("pattern"):
                     st.caption(f"**Grupo / patrón:** {ex['pattern']}")
                 if ex.get("block"):
@@ -657,194 +681,13 @@ with tabs[0]:
                     )
     
     st.markdown("")
-    st.caption(
-        "Plan ampliado a 12 semanas con tres ciclos de cuatro semanas. "
-        "Las cargas reportadas en el seguimiento se conservan en su semana original "
-        "y el resumen muestra un máximo móvil de 30 días, no una meta impuesta. "
-        "Las futuras semanas no tienen progresiones de peso inventadas."
-    )
+    st.caption("Doce semanas del nuevo bloque con la misma estructura inicial, sin cargas futuras inventadas. Al completar 12–12–12 a RIR 2, subí el menor salto disponible. Las referencias anteriores no se asignan automáticamente.")
 
 with tabs[1]:
     st.markdown("### 📋 Rutina resumen")
-    st.caption("Modo gimnasio: todos los ejercicios de un vistazo y el mayor peso disponible del último mes.")
-    qw, qd, qu = st.columns([1, 1.3, .8])
-    with qw:
-        summary_week = st.selectbox(
-            "SEMANA", PLAN_WEEKS, format_func=lambda v: f"Semana {v}",
-            key="quick_week",
-        )
-    with qd:
-        summary_day = st.selectbox(
-            "DÍA", [1, 2, 3, 4, 5],
-            format_func=lambda v: DAY_NAMES[v - 1], key="quick_day",
-        )
-    with qu:
-        summary_unit = st.selectbox("PESO EN", ["lb", "kg"], key="quick_unit")
-    day_exercises = [
-        x for x in PLAN
-        if int(x["week"]) == summary_week and int(x["day"]) == summary_day
-    ]
-    render_day_watch_summary(WATCH_WORKOUTS, summary_week, summary_day)
-    # Resumen de ejercicios realmente cargados en esta semana/día.
-    # La planificación sigue intacta; mostramos ambas versiones.
-    completed_for_day = {}
-    for registered in SESSIONS:
-        if not isinstance(registered, dict):
-            continue
-        try:
-            same_slot = (int(registered.get("week", -1)) == summary_week
-                         and int(registered.get("day", -1)) == summary_day)
-        except (TypeError, ValueError):
-            continue
-        if not same_slot:
-            continue
-        exercise_id = str(registered.get("exercise_id", ""))
-        if not exercise_id:
-            continue
-        if (exercise_id not in completed_for_day
-                or str(registered.get("date", "")) >=
-                   str(completed_for_day[exercise_id].get("date", ""))):
-            completed_for_day[exercise_id] = registered
-
-    def quick_recorded_sets(exercise):
-        latest = completed_for_day.get(str(exercise.get("id", "")))
-        if not latest:
-            return ""
-        real_sets = latest.get("sets")
-        if not isinstance(real_sets, list) or not real_sets:
-            return ""
-        counts = []
-        for series in real_sets:
-            if not isinstance(series, dict):
-                continue
-            try:
-                counts.append(str(max(0, int(series.get("reps", 0)))))
-            except (TypeError, ValueError):
-                counts.append("?")
-        if not counts:
-            return ""
-        reps_text = counts[0] if len(set(counts)) == 1 else "/".join(counts)
-        when = str(latest.get("date", ""))
-        try:
-            shown_date = date.fromisoformat(when).strftime("%d/%m")
-        except ValueError:
-            shown_date = when[:10]
-        return (
-            f'<div class="quick-actual">HECHO: {len(counts)} × {html_escape(reps_text)}</div>'
-            f'<div class="quick-actual-date">Registrado: {html_escape(shown_date)}</div>'
-        )
-
-    def quick_weight_text(exercise):
-        # Miércoles: la referencia de la foto es el plan; no la confundimos
-        # con el máximo móvil que sigue calculándose para el resto de la app.
-        reference = planned_load_text(exercise, summary_unit)
-        if reference is not None:
-            return reference
-        name = " ".join(str(exercise.get("exercise", "")).strip().casefold().split())
-        peak = MONTHLY_MAX.get(name)
-        if not peak:
-            return "—"
-        factor = 1.0 if summary_unit == "kg" else 1.0 / 0.45359237
-        if peak.get("scope") == "peso_corporal":
-            return "Peso corporal"
-        value = fmt(peak["kg"] * factor, 1).removesuffix(",0")
-        if peak.get("scope") == "por_lado_y_barra":
-            return f"{value} {summary_unit}/lado + barra"
-        if peak.get("scope") == "mancuernas_sin_desglosar":
-            return f"{value} {summary_unit} · mancuernas*"
-        return f"{value} {summary_unit}"
-
-    st.markdown(
-        f'<div class="finish" style="margin:12px 0 15px;padding:16px 20px">'
-        f'<div class="mini-title">VISTA RÁPIDA · ENTRENAMIENTO</div>'
-        f'<h3 style="margin:3px 0 4px">SEMANA {summary_week} · {DAY_NAMES[summary_day - 1].upper()}</h3>'
-        f'<div class="muted">{len(day_exercises)} ejercicios · ' 
-        f'{"cargas de referencia" if summary_day == 3 else "máximos"} en {summary_unit}</div></div>',
-        unsafe_allow_html=True,
-    )
-    st.caption(
-        "El resumen muestra el PLAN y, si guardaste series para ese ejercicio "
-        "en la semana elegida, también el último registro HECHO. "
-        "No se modifica la rutina original."
-    )
-    st.markdown(
-        '<div class="efg-legend" aria-label="Referencia visual">'
-        '<span class="efg-legend-item efg-legend-tri">AZUL · Triserie</span>'
-        '<span class="efg-legend-item efg-legend-ss">VIOLETA · Superserie</span>'
-        '<span class="efg-legend-item efg-legend-uni">OSCURO · Individual</span>'
-        '</div>', unsafe_allow_html=True,
-    )
-
-    groups = []
-    for position, item in enumerate(day_exercises, 1):
-        kind = str(item.get("set_type", "individual"))
-        if kind not in ("superserie", "triserie"):
-            kind = "individual"
-        letter = str(item.get("set_group", "")).strip() if kind != "individual" else ""
-        group_key = (kind, letter) if kind != "individual" else ("individual", position)
-        if not groups or groups[-1]["key"] != group_key:
-            groups.append({"key": group_key, "kind": kind, "letter": letter, "items": []})
-        groups[-1]["items"].append((position, item))
-
-    html_parts = []
-    for group in groups:
-        kind = group["kind"]
-        if kind == "triserie":
-            heading = f"TRISERIE {html_escape(group['letter'])} · {len(group['items'])} ejercicios"
-        elif kind == "superserie":
-            heading = f"SUPERSERIE {html_escape(group['letter'])} · {len(group['items'])} ejercicios"
-        else:
-            heading = "EJERCICIO INDIVIDUAL"
-        html_parts.append(
-            f'<section class="quick-group {kind}">'
-            f'<div class="quick-group-title">{heading}</div>'
-            f'<div class="quick-cols"><span>EJERCICIO</span><span>SERIES × REPS</span>'
-            f'<span>{"PESO REF." if summary_day == 3 else "PESO MÁX."}</span></div>'
-        )
-        for position, exercise in group["items"]:
-            ex_name = html_escape(str(exercise.get("exercise", "")))
-            series = html_escape(str(exercise.get("series", "—") or "—"))
-            reps = html_escape(str(exercise.get("repetitions", "—") or "—"))
-            effort = str(exercise.get("intensity", "")).strip()
-            notes = (" · " + html_escape(effort)) if effort else ""
-            weight_value = quick_weight_text(exercise)
-            recorded_text = quick_recorded_sets(exercise)
-            html_parts.append(
-                '<div class="quick-row">'
-                f'<div class="quick-ex"><span class="quick-num">{position:02d}.</span> {ex_name}'
-                f'<div class="quick-note">{html_escape(str(exercise.get("pattern", "")))}{notes}</div></div>'
-                f'<div class="quick-count"><div class="quick-plan">PLAN: {series} × {reps}</div>'
-                f'{recorded_text}</div>'
-                f'<div class="quick-load">{html_escape(weight_value)}</div></div>'
-            )
-        html_parts.append("</section>")
-    st.markdown("".join(html_parts), unsafe_allow_html=True)
-    if summary_day == 3:
-        st.caption(
-            "MIÉRCOLES · Rutina de referencia actualizada: 9 ejercicios "
-            "en las 12 semanas. Los pesos mostrados son objetivos de referencia, "
-            "NO cargas máximas medidas ni sesiones realizadas."
-        )
+    render_summary(PLAN, SESSIONS, LEGACY_PLAN, prefix="quick")
     if HISTORY.get("_offline"):
-        st.warning("No se pudo actualizar el historial: pueden faltar los últimos pesos reales.")
-    if summary_day == 3:
-        st.caption(
-            "PESO REF.: referencia aportada para la rutina del miércoles, no "
-            "resultado ni máximo real. En mancuernas (*) no se presupone si la "
-            "cifra es total o por mancuerna. En barra Z son libras por lado; "
-            "el peso de la barra no está informado. "
-            "Las series realizadas se muestran por separado al guardarlas."
-        )
-    else:
-        st.caption(
-            "PESO MÁX.: mayor carga comparable registrada en los últimos 30 días, "
-            "aunque en el último entrenamiento hayas usado menos. "
-            "Los pesos por lado se muestran por lado + barra, sin inventar el peso de la barra. "
-            "En mancuernas (*) no se presupone si la cifra es total o por mancuerna. "
-            "Las cargas confirmadas sin repeticiones también cuentan como referencia de peso. "
-            "Sin dato reciente se conserva la referencia inicial del Excel, sin fecha. "
-            "«—» significa que no hay carga registrada."
-        )
+        st.warning("No se pudo actualizar el historial. Pueden faltar los últimos registros.")
 
 
 with tabs[2]:
@@ -865,8 +708,9 @@ with tabs[3]:
             'Mientras tanto, estas son las referencias originales de la rutina.</div>',
             unsafe_allow_html=True,
         )
+        render_exercise_progress(SESSIONS, ALL_PLAN, plot_layout, prefix="progress_empty")
         x, y, z = st.columns(3)
-        x.metric("Sesiones registradas", 0)
+        x.metric("Sesiones registradas", len(SESSIONS))
         y.metric("Series realizadas", 0)
         z.metric("Volumen acumulado", "—")
         refs = [
@@ -936,66 +780,7 @@ with tabs[3]:
         st.plotly_chart(plot_layout(fig), use_container_width=True, config={"displayModeBar":False})
 
         st.markdown("#### 💪 Evolución por ejercicio")
-        picked = st.selectbox("Elegí el movimiento", sorted(DF["Ejercicio"].unique()),
-                              key="stats_exercise")
-        filtered = DF[DF["Ejercicio"] == picked]
-        by_date = filtered.groupby("Fecha")["Carga (kg)"].max().reset_index()
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=by_date["Fecha"], y=by_date["Carga (kg)"], mode="lines+markers",
-            line=dict(color=PINK, width=4),
-            marker=dict(size=12, color=PURPLE, line=dict(color="#FFFFFF",width=2)),
-            fill="tozeroy", fillcolor="rgba(168,85,247,.12)",
-            hovertemplate="%{x}<br>%{y:.2f} kg<extra></extra>",
-        ))
-        fig.update_layout(yaxis_title="Carga máxima registrada (kg)")
-        st.plotly_chart(plot_layout(fig), use_container_width=True, config={"displayModeBar":False})
-        st.markdown("#### 🔁 Más repeticiones con el mismo peso")
-        st.caption(
-            "Compará tu mejor serie por fecha manteniendo la misma carga. "
-            "Así se ve el progreso por repeticiones aunque los kilos no cambien."
-        )
-        available_loads = sorted(filtered["Carga (kg)"].unique().tolist(), reverse=True)
-        load_frequency = filtered.groupby("Carga (kg)")["Fecha"].nunique()
-        default_load = max(available_loads, key=lambda load: (int(load_frequency[load]), load))
-        chosen_load = st.selectbox(
-            "Carga para comparar",
-            available_loads,
-            index=available_loads.index(default_load),
-            format_func=lambda load: f"{fmt(load, 2).removesuffix(',00')} kg",
-            key="stats_repetition_load",
-        )
-        same_load_reps = (
-            filtered[filtered["Carga (kg)"] == chosen_load]
-            .groupby("Fecha", as_index=False)["Repeticiones"].max()
-            .sort_values("Fecha")
-        )
-        first_reps = int(same_load_reps.iloc[0]["Repeticiones"])
-        last_reps = int(same_load_reps.iloc[-1]["Repeticiones"])
-        rep_a, rep_b = st.columns(2)
-        rep_a.metric("Última mejor serie", f"{last_reps} rep")
-        rep_b.metric(
-            "Cambio desde el primer registro",
-            f"{last_reps - first_reps:+d} rep" if len(same_load_reps) >= 2 else "—",
-        )
-        reps_fig = go.Figure(go.Scatter(
-            x=same_load_reps["Fecha"], y=same_load_reps["Repeticiones"],
-            mode="lines+markers+text",
-            line=dict(color=CYAN, width=4),
-            marker=dict(size=12, color=PURPLE, line=dict(color="#FFFFFF", width=2)),
-            text=[str(int(n)) for n in same_load_reps["Repeticiones"]],
-            textposition="top center",
-            hovertemplate="%{x}<br>%{y:.0f} repeticiones<extra></extra>",
-        ))
-        reps_fig.update_layout(yaxis_title="Mejor serie (repeticiones)", xaxis_title="Fecha")
-        st.plotly_chart(
-            plot_layout(reps_fig), use_container_width=True,
-            config={"displayModeBar": False},
-        )
-        st.caption(
-            "Se toma la serie con más repeticiones de cada fecha a la carga elegida, "
-            "no la suma de todas las series. Interpretá las mejoras junto con la técnica y el RIR."
-        )
+        render_exercise_progress(SESSIONS, ALL_PLAN, plot_layout, prefix="progress")
         st.markdown("#### Resumen semanal")
         show = by_week.rename(columns={
             "Semana calendario":"Semana (lunes)", "Volumen":"Volumen (kg·rep)"
@@ -1019,474 +804,21 @@ with tabs[5]:
     st.markdown("### 📚 Historial y evolución de fuerza")
     render_session_detail(SESSIONS)
     st.divider()
-    st.caption(
-        "Tres fuentes diferenciadas: planilla inicial (semana 1), seguimiento "
-        "conversado por semana y sesiones guardadas desde EFG Training."
-    )
+    st.markdown("#### Evolución con registros de ambos bloques")
+    render_exercise_progress(SESSIONS, ALL_PLAN, plot_layout, prefix="history")
+    st.download_button("Descargar historial completo sin modificar", json.dumps(HISTORY, ensure_ascii=False, indent=2), "efg_historial_completo.json", "application/json", key="history_json")
+    if not DF.empty:
+        st.download_button("Descargar series con carga total cuantificada", DF.to_csv(index=False).encode("utf-8-sig"), "efg_series_cuantificadas.csv", "text/csv", key="history_csv")
+    with st.expander("Reportes y referencias de la rutina anterior"):
+        rows = []
+        for e in LEGACY_PLAN:
+            report = e.get("weekly_report")
+            if isinstance(report, dict):
+                rows.append({"Semana":e["week"], "Día":e["day_label"], "Ejercicio":e["exercise"], "Fecha":report.get("date"), "Carga lb":report.get("lb"), "Cargas por serie lb":str(report.get("series_lb", "")), "Condición":report.get("scope", "")})
+        st.dataframe(rows, hide_index=True, use_container_width=True)
+        st.caption("Las referencias sin fecha y el resumen completo están en Rutinas antiguas. Ninguna referencia se convierte en sesión realizada.")
+    st.download_button("Descargar nuevo plan de 12 semanas", pd.DataFrame(PLAN).to_csv(index=False).encode("utf-8-sig"), "efg_nuevo_plan_12_semanas.csv", "text/csv", key="new_plan_csv")
 
-    # Estos pesos son máximos históricos informados por Edu, no sesiones fechadas.
-    historic = []
-    for ex in PLAN:
-        if int(ex.get("week", 0)) != 1:
-            continue
-        raw_sequence = ex.get("reference_series_kg")
-        valid_sequence = []
-        if isinstance(raw_sequence, list):
-            for amount in raw_sequence:
-                try:
-                    number = float(amount)
-                    if math.isfinite(number) and number >= 0:
-                        valid_sequence.append(number)
-                except (ValueError, TypeError):
-                    continue
-        if valid_sequence:
-            historic_max = max(valid_sequence)
-        else:
-            try:
-                raw_max = ex.get("reference_weight_kg")
-                historic_max = float(raw_max) if raw_max is not None else None
-                if historic_max is not None and (not math.isfinite(historic_max) or historic_max < 0):
-                    historic_max = None
-            except (ValueError, TypeError):
-                historic_max = None
-        if historic_max is None:
-            continue
-        historic.append({
-            "exercise": str(ex.get("exercise", "")).strip(),
-            "day": int(ex["day"]),
-            "pattern": str(ex.get("pattern", "")),
-            "set_type": str(ex.get("set_type", "individual")),
-            "sets": str(ex.get("series", "")),
-            "reps": str(ex.get("repetitions", "")),
-            "max_kg": historic_max,
-            "per_set": valid_sequence,
-        })
-
-    st.markdown("#### 📌 Referencias iniciales del Excel · Semana 1")
-    st.caption(
-        "Las cargas de la planilla original se muestran aquí como punto de partida. "
-        "Los valores documentados de las semanas siguientes aparecen en el seguimiento "
-        "semanal, sin sustituir ni inventar sesiones de la aplicación."
-    )
-    historical_by_exercise = {}
-    for item in historic:
-        normalized = item["exercise"].casefold()
-        historical_by_exercise[normalized] = max(
-            item["max_kg"], historical_by_exercise.get(normalized, 0.0)
-        )
-    a, b, c = st.columns(3)
-    a.metric("Ejercicios con referencia", len(historic))
-    b.metric("Sesiones guardadas", len([x for x in SESSIONS if isinstance(x, dict)]))
-    c.metric("Ejercicios con sesiones", len({
-        str(x.get("exercise", "")).strip().casefold()
-        for x in SESSIONS if isinstance(x, dict) and x.get("exercise")
-    }))
-
-    ref_table = []
-    for ex in historic:
-        ref_table.append({
-            "Día": DAY_NAMES[ex["day"] - 1],
-            "Ejercicio": ex["exercise"],
-            "Bloque": (
-                "Triserie" if ex["set_type"] == "triserie"
-                else "Superserie" if ex["set_type"] == "superserie"
-                else "Individual"
-            ),
-            "Series": ex["sets"],
-            "Repeticiones": ex["reps"],
-            "Máximo (lb)": round(ex["max_kg"] / 0.45359237, 1),
-            "Máximo (kg)": round(ex["max_kg"], 2),
-            "Cargas por serie (lb)": (
-                " · ".join(fmt(v / 0.45359237, 1) for v in ex["per_set"])
-                if ex["per_set"] else "—"
-            ),
-        })
-    if ref_table:
-        st.dataframe(
-            pd.DataFrame(ref_table), use_container_width=True,
-            hide_index=True, height=340,
-        )
-        st.download_button(
-            "⬇️ Descargar referencia original del Excel (CSV)",
-            pd.DataFrame(ref_table).to_csv(index=False).encode("utf-8-sig"),
-            "efg_training_maximos_mes_anterior.csv", "text/csv",
-        )
-        st.markdown("##### Comparación visual por día")
-        historic_day = st.selectbox(
-            "Día de entrenamiento", list(range(1, 6)),
-            format_func=lambda d: DAY_NAMES[d - 1],
-            key="history_reference_day",
-        )
-        chosen_refs = [ex for ex in historic if ex["day"] == historic_day]
-        if chosen_refs:
-            ref_chart = go.Figure(go.Bar(
-                x=[r["max_kg"] for r in chosen_refs],
-                y=[r["exercise"] for r in chosen_refs],
-                orientation="h",
-                marker=dict(
-                    color=[
-                        CYAN if r["set_type"] == "triserie"
-                        else PINK if r["set_type"] == "superserie" else PURPLE
-                        for r in chosen_refs
-                    ],
-                    line=dict(width=0),
-                ),
-                text=[fmt(r["max_kg"], 1) + " kg" for r in chosen_refs],
-                textposition="outside",
-                hovertemplate="%{y}: %{x:.2f} kg<extra>Mes anterior · Excel</extra>",
-            ))
-            ref_chart.update_layout(
-                yaxis=dict(autorange="reversed"),
-                xaxis_title="Carga externa máxima (kg)",
-                margin=dict(l=10, r=35, t=20, b=35),
-            )
-            st.plotly_chart(
-                plot_layout(ref_chart, max(310, 42 * len(chosen_refs))),
-                use_container_width=True,
-                config={"displayModeBar": False},
-            )
-            st.caption(
-                "Visualización descriptiva: las cargas de máquinas y ejercicios diferentes "
-                "no son comparables como una medida de rendimiento general."
-            )
-
-    st.divider()
-    st.markdown("#### 🗓️ Pesos reportados por semana")
-    week_reports = []
-    for item in PLAN:
-        detail = item.get("weekly_report")
-        if not isinstance(detail, dict):
-            continue
-        values = detail.get("series_lb")
-        if not isinstance(values, list) or not values:
-            values = [detail.get("lb")]
-        try:
-            values = [float(number) for number in values]
-            if not values or any(not math.isfinite(v) or v < 0 for v in values):
-                continue
-        except (TypeError, ValueError):
-            continue
-        week_reports.append({
-            "exercise": str(item.get("exercise", "")).strip(),
-            "week": int(item["week"]),
-            "date": str(detail.get("date", "")),
-            "lb": max(values),
-            "scope": str(detail.get("scope", "")),
-            "series_lb": values,
-        })
-    st.caption(
-        "Cargas comunicadas en «Evaluación y plan fitness», asociadas a su semana. "
-        "Se respeta «por lado», «por mancuerna» o «máquina»: no son cargas totales "
-        "ni necesariamente máximos de una repetición."
-    )
-    if week_reports:
-        with st.expander(
-            f"Consultar todos los registros recuperados ({len(week_reports)})",
-            expanded=False,
-        ):
-            st.dataframe(
-                pd.DataFrame([
-                    {
-                        "Semana": item["week"],
-                        "Fecha": item["date"],
-                        "Ejercicio": item["exercise"],
-                        "Carga (lb)": round(item["lb"], 1),
-                        "Referencia de carga": item["scope"],
-                        "Por serie (lb)": (
-                            " / ".join(fmt(v, 1) for v in item["series_lb"])
-                            if len(item["series_lb"]) > 1 else "—"
-                        ),
-                    } for item in week_reports
-                ]).sort_values(["Semana", "Fecha", "Ejercicio"]),
-                use_container_width=True, hide_index=True, height=350,
-            )
-
-    st.divider()
-    st.markdown("#### 📈 Gráfico de evolución por ejercicio")
-    st.caption(
-        "Elegí un ejercicio para ver su propio gráfico. La línea utiliza las fechas reales "
-        "de cada sesión; la referencia del Excel nunca se coloca en una fecha inventada."
-    )
-    exercise_names = {
-        str(x.get("exercise", "")).strip() for x in PLAN
-        if str(x.get("exercise", "")).strip()
-    }
-    exercise_names.update(
-        str(x.get("exercise", "")).strip() for x in SESSIONS
-        if isinstance(x, dict) and str(x.get("exercise", "")).strip()
-    )
-    exercise_options = sorted(exercise_names, key=str.casefold)
-    if exercise_options:
-        default_ex = "Sit ups con disco"
-        default_index = exercise_options.index(default_ex) if default_ex in exercise_options else 0
-        chosen_name = st.selectbox(
-            "Seleccioná el ejercicio", exercise_options,
-            index=default_index, key="history_exercise_chart",
-        )
-        chosen_key = chosen_name.casefold()
-        baseline = historical_by_exercise.get(chosen_key)
-        weekly_points = sorted(
-            [r for r in week_reports if r["exercise"].casefold() == chosen_key],
-            key=lambda record: (record["week"], record["date"]),
-        )
-
-        # Resumir únicamente cargas reales, con fecha, para el movimiento elegido.
-        dated = {}
-        reps_by_load = {}
-        for session in SESSIONS:
-            if not isinstance(session, dict):
-                continue
-            if str(session.get("exercise", "")).strip().casefold() != chosen_key:
-                continue
-            try:
-                real_date = date.fromisoformat(str(session.get("date", "")))
-            except (ValueError, TypeError):
-                continue
-            valid_sets = []
-            for series in session.get("sets", []):
-                if not isinstance(series, dict):
-                    continue
-                try:
-                    load = float(series.get("kg", 0))
-                    reps = int(series.get("reps", 0))
-                except (ValueError, TypeError):
-                    continue
-                if math.isfinite(load) and 0 <= load <= 1500 and 0 <= reps <= 10000:
-                    valid_sets.append((load, reps))
-            if not valid_sets:
-                continue
-            for load, reps in valid_sets:
-                load_key = round(load, 3)
-                date_reps = reps_by_load.setdefault(load_key, {})
-                date_reps[real_date] = max(date_reps.get(real_date, 0), reps)
-            if real_date not in dated:
-                dated[real_date] = {"max_kg": 0.0, "volume": 0.0, "reps": 0, "sets": 0}
-            dated[real_date]["max_kg"] = max(
-                dated[real_date]["max_kg"], max(x[0] for x in valid_sets)
-            )
-            dated[real_date]["volume"] += sum(x[0] * x[1] for x in valid_sets)
-            dated[real_date]["reps"] += sum(x[1] for x in valid_sets)
-            dated[real_date]["sets"] += len(valid_sets)
-
-        history_dates = sorted(dated)
-        last_real = dated[history_dates[-1]]["max_kg"] if history_dates else None
-        earliest = weekly_points[0] if weekly_points else None
-        latest = weekly_points[-1] if weekly_points else None
-        comparable = (
-            len(weekly_points) >= 2
-            and earliest["scope"] == latest["scope"]
-        )
-        m1, m2, m3 = st.columns(3)
-        m1.metric(
-            "Última carga reportada",
-            f"{fmt(latest['lb'], 1)} lb" if latest is not None else "—",
-        )
-        m2.metric(
-            "Última carga registrada en app",
-            f"{fmt(last_real, 1)} kg" if last_real is not None else "—",
-        )
-        m3.metric(
-            "Cambio entre reportes",
-            f"{latest['lb'] - earliest['lb']:+.1f} lb"
-            if comparable else "—",
-        )
-
-        if weekly_points:
-            st.markdown("##### 📈 Evolución semanal reportada")
-            weekly_values = {
-                int(item["week"]): float(item["lb"]) for item in weekly_points
-            }
-            weekly_labels = {
-                int(item["week"]): item["scope"] for item in weekly_points
-            }
-            x_axis = list(PLAN_WEEKS)
-            y_axis = [weekly_values.get(i) for i in x_axis]
-            weekly_chart = go.Figure()
-            weekly_chart.add_trace(go.Scatter(
-                x=x_axis, y=y_axis, mode="lines+markers+text",
-                line=dict(color=CYAN, width=4),
-                marker=dict(size=12, color=PINK, line=dict(color="#FFFFFF", width=1)),
-                text=[
-                    f"{fmt(v, 1)} lb" if v is not None else ""
-                    for v in y_axis
-                ],
-                textposition="top center",
-                connectgaps=False,
-                hovertemplate="%{x}<br>%{y:.1f} lb<extra>Seguimiento conversado</extra>",
-            ))
-            weekly_chart.update_layout(
-                yaxis_title="Carga reportada (lb, con su condición de uso)",
-                xaxis=dict(
-                    type="linear", tickmode="linear", dtick=1,
-                    range=[0.7, max(PLAN_WEEKS) + 0.3],
-                    title="Semana del plan",
-                ),
-                margin=dict(l=10, r=20, t=45, b=35),
-            )
-            st.plotly_chart(
-                plot_layout(weekly_chart, 350), use_container_width=True,
-                config={"displayModeBar": False},
-            )
-            qualifiers = sorted(set(weekly_labels.values()))
-            st.caption(
-                "Unidad según registro: " + ", ".join(qualifiers) + ". "
-                "Los puntos son los pesos reportados para cada semana; los huecos "
-                "significan que no hay carga confirmada. "
-                "No se sumó el peso de una barra cuando solo se informó «por lado»."
-            )
-        elif baseline is not None:
-            st.caption("Solo tenemos la referencia inicial del Excel para este ejercicio.")
-
-        if history_dates:
-            st.markdown("##### Entrenamientos registrados en EFG Training")
-            selected_metric = st.radio(
-                "Indicador del gráfico",
-                ["Carga máxima", "Volumen", "Repeticiones", "Repeticiones a igual carga"],
-                horizontal=True, key="history_chart_metric",
-            )
-            if selected_metric == "Repeticiones a igual carga":
-                loads = sorted(reps_by_load, reverse=True)
-                default_load = max(loads, key=lambda load: (len(reps_by_load[load]), load))
-                fixed_load = st.selectbox(
-                    "Comparar con carga fija",
-                    loads,
-                    index=loads.index(default_load),
-                    format_func=lambda load: f"{fmt(load, 2).removesuffix(',00')} kg",
-                    key="history_repetition_load",
-                )
-                x_dates = sorted(reps_by_load[fixed_load])
-                y_values = [reps_by_load[fixed_load][d] for d in x_dates]
-            else:
-                metric_key = {
-                    "Carga máxima": "max_kg",
-                    "Volumen": "volume",
-                    "Repeticiones": "reps",
-                }[selected_metric]
-                x_dates = history_dates
-                y_values = [dated[d][metric_key] for d in x_dates]
-            chart = go.Figure()
-            if selected_metric == "Volumen":
-                chart.add_trace(go.Bar(
-                    x=x_dates, y=y_values, marker_color=PURPLE,
-                    hovertemplate="%{x|%d/%m/%Y}<br>%{y:.1f} kg·rep<extra></extra>",
-                ))
-            else:
-                chart.add_trace(go.Scatter(
-                    x=x_dates, y=y_values, mode="lines+markers",
-                    line=dict(color=PINK, width=3),
-                    marker=dict(size=11, color=PURPLE, line=dict(color="#FFFFFF", width=1)),
-                    hovertemplate=(
-                        "%{x|%d/%m/%Y}<br>%{y:.2f} kg<extra></extra>"
-                        if selected_metric == "Carga máxima" else
-                        "%{x|%d/%m/%Y}<br>%{y:.0f} repeticiones<extra></extra>"
-                    ),
-                ))
-            if selected_metric == "Carga máxima" and baseline is not None:
-                chart.add_hline(
-                    y=baseline, line_color=CYAN, line_width=2,
-                    line_dash="dash", annotation_text="Base Excel S1 (sin fecha)",
-                    annotation_position="top left",
-                    annotation_font_color=CYAN,
-                )
-            chart.update_layout(
-                yaxis_title={
-                    "Carga máxima": "Carga máxima por sesión (kg)",
-                    "Volumen": "kg × repeticiones",
-                    "Repeticiones": "Repeticiones totales",
-                    "Repeticiones a igual carga": "Mejor serie a carga fija (repeticiones)",
-                }[selected_metric],
-                xaxis=dict(type="date", tickformat="%d/%m/%y"),
-                margin=dict(l=10, r=20, t=45, b=35),
-            )
-            st.plotly_chart(
-                plot_layout(chart, 365), use_container_width=True,
-                config={"displayModeBar": False},
-            )
-            if selected_metric == "Repeticiones a igual carga":
-                st.caption(
-                    f"Cada punto muestra la serie con más repeticiones realizada con "
-                    f"{fmt(fixed_load, 2).removesuffix(',00')} kg en esa fecha. "
-                    "No suma repeticiones de series diferentes."
-                )
-            detail_rows = [
-                {
-                    "Fecha": day_record,
-                    "Máximo (kg)": round(dated[day_record]["max_kg"], 2),
-                    "Series": dated[day_record]["sets"],
-                    "Repeticiones": dated[day_record]["reps"],
-                    "Volumen (kg·rep)": round(dated[day_record]["volume"], 1),
-                }
-                for day_record in reversed(history_dates)
-            ]
-            st.dataframe(
-                pd.DataFrame(detail_rows), use_container_width=True, hide_index=True,
-                column_config={"Fecha": st.column_config.DateColumn("Fecha", format="DD/MM/YYYY")},
-            )
-            st.caption(
-                "El máximo es la carga externa mayor de esa sesión, no una estimación de 1RM. "
-                "Volumen = kg × repeticiones; compará el mismo movimiento y equipamiento."
-            )
-        elif weekly_points:
-            st.info(
-                "Este gráfico muestra los pesos conversados por semana. "
-                "Las sesiones con fechas y estadísticas de volumen aparecerán cuando "
-                "registres entrenamientos desde ADMIN."
-            )
-        elif baseline is not None:
-            # El Excel trae referencias sin fechas; representamos una barra, no una tendencia falsa.
-            figure = go.Figure(go.Bar(
-                x=["Base Excel · semana 1 (sin fecha exacta)"], y=[baseline],
-                marker_color=CYAN,
-                text=[fmt(baseline, 1) + " kg"], textposition="outside",
-                hovertemplate="Referencia histórica: %{y:.2f} kg<extra></extra>",
-            ))
-            figure.update_layout(yaxis_title="Carga máxima (kg)")
-            st.plotly_chart(
-                plot_layout(figure, 310), use_container_width=True,
-                config={"displayModeBar": False},
-            )
-            st.info(
-                "Para este ejercicio solo tenemos una referencia inicial del Excel. "
-                "La evolución semanal aparecerá al sumar cargas reportadas o "
-                "sesiones guardadas desde ADMIN."
-            )
-        else:
-            st.info(
-                "Este ejercicio está en el plan, pero no tiene una carga histórica conocida "
-                "ni sesiones reales guardadas. Su gráfico aparecerá cuando registres datos."
-            )
-
-    st.divider()
-    st.markdown("#### 🗂️ Sesiones realmente registradas")
-    st.caption("Cada entrenamiento guardado desde el administrador aparece aquí para todos.")
-    if DF.empty:
-        st.info("Aún no se cargaron entrenamientos realizados. La rutina y sus pesos de referencia están en Mi rutina.")
-    else:
-        ordered = DF.sort_values(["Fecha","Día","Ejercicio","Serie"],
-                                 ascending=[False,True,True,True])
-        if st.checkbox("Mostrar únicamente un ejercicio"):
-            wanted = st.selectbox("Ejercicio", sorted(ordered["Ejercicio"].unique()),
-                                  key="filter_history_ex")
-            ordered = ordered[ordered["Ejercicio"] == wanted]
-        st.dataframe(
-            ordered.drop(columns=["Volumen","Semana calendario"], errors="ignore"),
-            hide_index=True, use_container_width=True,
-            column_config={"Fecha": st.column_config.DateColumn("Fecha", format="DD/MM/YYYY")}
-        )
-        csv_file = ordered.to_csv(index=False).encode("utf-8-sig")
-        st.download_button("⬇️ Descargar historial CSV",
-                           csv_file, "efg_training_historial.csv", "text/csv")
-
-    plan_rows = pd.DataFrame(PLAN)
-    included = ["week","day","pattern","block","exercise","series","repetitions",
-                "intensity","notes","set_type","set_group","reference_weight_lb","reference_weight_kg",
-                "reference_weight_lb_text","weekly_report","template_week"]
-    st.download_button(
-        "⬇️ Descargar plan completo (12 semanas) en CSV",
-        plan_rows.reindex(columns=included, fill_value="").to_csv(index=False).encode("utf-8-sig"),
-        "efg_training_plan_completo.csv", "text/csv",
-        help="Incluye los ejercicios y pesos de referencia que existían en el Excel original."
-    )
 
 with tabs[6]:
     st.markdown("### ⚖️ Evolución del peso corporal")
@@ -1560,6 +892,7 @@ with tabs[7]:
                     key="register_exercise",
                 )
                 ex = choices[selected]
+                st.caption("Registro del bloque nuevo. Las cargas previas son solo referencia y no se precargan.")
                 ident = f"{edit_date.isoformat()}|{ex['id']}"
                 previous = next((s for s in SESSIONS if s.get("id")==ident), None)
                 previous_sets = previous.get("sets", []) if isinstance(previous, dict) else []
@@ -1598,6 +931,9 @@ with tabs[7]:
                         "Confirmá este cambio abajo para continuar."
                     )
                 units = st.radio("Unidad de carga", ["kg", "lb"], horizontal=True, key="register_units")
+                scope_options = ["Carga total externa", "Máquina o polea", "Disco", "Por mancuerna", "Por lado · barra o plataforma aparte", "Lastre externo", "Peso corporal", "Alcance sin confirmar"]
+                initial_scope = scope_key(previous.get("load_scope", "") if previous else ex.get("load_scope", ""))
+                load_condition = st.selectbox("Condición de la carga registrada", scope_options, index=scope_options.index(initial_scope), key=f"register_scope_{ex['id']}_{edit_date.isoformat()}", help="Si anotás peso por lado o por mancuerna, no lo sumamos como carga total. Las condiciones tienen curvas separadas.")
                 with st.form("register_session_form", clear_on_submit=False):
                     new_sets = []
                     for i in range(series_count):
@@ -1607,7 +943,7 @@ with tabs[7]:
                                   else None)
                         # Una carga total desconocida se almacena como None,
                         # no como cero. Ej.: peso por lado conocido, barra sin pesar.
-                        raw_kg = oldset.get("kg") if oldset else None
+                        raw_kg = (oldset.get("kg") if oldset.get("kg") is not None else (oldset.get("load_lb") * 0.45359237 if oldset.get("load_lb") is not None else None)) if oldset else None
                         try:
                             stored_kg = float(raw_kg) if raw_kg is not None else None
                             if stored_kg is not None and (
@@ -1620,29 +956,28 @@ with tabs[7]:
                         if units == "lb":
                             weight /= 0.45359237
                         try:
-                            old_reps = int(oldset.get("reps")) if oldset else reps_plan[i]
+                            old_reps = int(oldset.get("reps_per_side", oldset.get("reps"))) if oldset else reps_plan[i]
                         except (TypeError, ValueError):
                             old_reps = reps_plan[i]
                         a, b, c = st.columns([.5,1.35,1.35])
                         a.markdown(f"**S{i+1}**")
                         with b:
                             missing_load = st.checkbox(
-                                f"Carga total pendiente · S{i+1}",
+                                f"Carga no informada · S{i+1}",
                                 value=oldset is not None and stored_kg is None,
                                 key=f"pending_{ex['id']}_{edit_date.isoformat()}_{i}",
-                                help="Usá esta opción cuando se conocen las repeticiones "
-                                     "pero no el peso total. No se guarda un cero ficticio.",
+                                help="Usá esta opción si no se conoce la carga de la serie. No se guarda un cero ficticio.",
                             )
                             loaded = st.number_input(
                                 f"Carga ({units}) · S{i+1}", 0.0, 1500.0,
                                 value=round(weight,2), step=2.5,
-                                help="Si marcás «Carga total pendiente», este valor "
+                                help="Si marcás «Carga no informada», este valor "
                                      "no se guardará hasta que confirmes la carga real.",
                                 key=f"weight_{ex['id']}_{edit_date.isoformat()}_{units}_{i}",
                             )
                         with c:
                             rep = st.number_input(
-                                f"Reps · S{i+1}", 0, 10000,
+                                f"{'Segundos' if ex.get('duration_unit') == 'seconds' else ('Reps por lado' if ex.get('repetitions_per_side') else 'Reps')} · S{i+1}", 0, 10000,
                                 value=max(0, min(10000, old_reps)),
                                 step=1, key=f"reps_{ex['id']}_{edit_date.isoformat()}_{i}",
                             )
@@ -1650,25 +985,28 @@ with tabs[7]:
                         # (alcance de carga, fuente y notas de cada serie).
                         row = dict(oldset) if oldset else {}
                         row["kg"] = (
-                            None if missing_load else
+                            None if missing_load or load_condition not in ("Carga total externa", "Máquina o polea", "Disco", "Peso corporal") else
                             round(loaded * (0.45359237 if units=="lb" else 1.0), 3)
                         )
-                        row["reps"] = int(rep)
+                        row["reps"] = int(rep) * (2 if ex.get("repetitions_per_side") else 1)
+                        if ex.get("repetitions_per_side"):
+                            row["reps_per_side"] = int(rep)
+                        row["load_scope"] = load_condition
                         if missing_load:
                             row.pop("load_lb", None)
-                        elif "load_lb" in row:
+                        else:
                             row["load_lb"] = round(
                                 loaded if units == "lb" else loaded / 0.45359237, 2
                             )
                         new_sets.append(row)
                     effort = st.selectbox(
                         "RIR real (opcional)", ["No registrado",0,1,2,3,4,5],
-                        index=0, key="register_rir",
+                        index=(["No registrado",0,1,2,3,4,5].index(previous.get("rir")) if previous and previous.get("rir") in [0,1,2,3,4,5] else 0), key=f"register_rir_{ex['id']}_{edit_date.isoformat()}",
                     )
                     note = st.text_area(
                         "Observaciones (opcional)",
                         value=previous.get("notes","") if previous else "",
-                        key="register_notes",
+                        key=f"register_notes_{ex['id']}_{edit_date.isoformat()}",
                     )
                     confirm_series_reduction = (
                         st.checkbox(
@@ -1705,16 +1043,19 @@ with tabs[7]:
                                 "week":edit_week,
                                 "day":edit_day,
                                 "exercise_id":ex["id"],
+                                "block_id": ACTIVE_BLOCK_ID,
+                                "duration_unit": ex.get("duration_unit", "reps"),
                                 "exercise":ex["exercise"],
                                 "sets":new_sets,
                                 "rir":None if effort=="No registrado" else int(effort),
                                 "notes":note[:900],
+                                "load_scope": load_condition,
                                 "saved_at":datetime.now(timezone.utc).isoformat(),
                             })
                             other.append(updated)
                             persist_remote(
                                 "data/history.json",
-                                {"schema_version":1,"sessions":other},
+                                dict(latest, sessions=other),
                                 TOKEN,
                                 f"EFG Training: registrar {ex['exercise']} {edit_date.isoformat()}",
                             )
@@ -1778,6 +1119,7 @@ with tabs[7]:
                     )
                     e_pattern = st.text_input("Patrón muscular", value=target["pattern"])
                     e_block = st.text_input("Bloque / orden", value=target["block"])
+                    e_rest = st.text_input("Descanso", value=target.get("rest", "2 min"))
                     e_notes = st.text_area("Observaciones técnicas", value=target["notes"])
                     update_plan = st.form_submit_button(
                         "💜 PUBLICAR CAMBIOS DE RUTINA", type="primary",
@@ -1790,7 +1132,7 @@ with tabs[7]:
                         st.error("Elegí la letra del grupo de la superserie o triserie.")
                     else:
                         try:
-                            current, _ = fetch_remote("data/plan.json", TOKEN)
+                            current, _ = fetch_remote("data/active_plan.json", TOKEN)
                             current_rows = current["entries"]
                             original = next((e for e in current_rows if e["id"]==target["id"]), None)
                             if not original:
@@ -1805,9 +1147,10 @@ with tabs[7]:
                                 "pattern":e_pattern.strip()[:100],
                                 "block":e_block.strip()[:100],
                                 "notes":e_notes.strip()[:1600],
+                                "rest":e_rest.strip()[:100],
                             })
                             persist_remote(
-                                "data/plan.json", current, TOKEN,
+                                "data/active_plan.json", current, TOKEN,
                                 f"EFG Training: actualizar semana {modify_week} día {modify_day}",
                             )
                             public_plan.clear()
@@ -1890,6 +1233,10 @@ with tabs[7]:
                         key=lambda item: item["Fecha"], reverse=True
                     )
                     st.dataframe(weight_rows, hide_index=True, use_container_width=True)
+
+with tabs[8]:
+    render_archive(LEGACY_PLAN, SESSIONS)
+    render_legacy_reports(LEGACY_PLAN, plot_layout)
 
 st.divider()
 st.markdown(

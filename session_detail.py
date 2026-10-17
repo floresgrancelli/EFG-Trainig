@@ -20,7 +20,13 @@ def _load_label(row: dict) -> str:
     load = row.get("reported_load_lb")
     scope = str(row.get("load_scope") or "").strip()
     if load is None:
-        return "No informada"
+        known = [x for x in row.get("sets", []) if isinstance(x, dict) and (x.get("load_lb") is not None or x.get("kg") is not None)]
+        if not known:
+            return "No informada"
+        values = [float(x["load_lb"]) if x.get("load_lb") is not None else float(x["kg"]) / LB_TO_KG for x in known]
+        load = max(values)
+        scope = str(known[-1].get("load_scope") or scope)
+
     if scope == "peso corporal" or load == 0:
         return "Peso corporal"
     label = _lb(load)
@@ -42,8 +48,10 @@ def _reps_label(session: dict) -> str:
         return "No confirmadas"
     if any(s.get("reps") is None for s in sets):
         return "Parciales"
-    reps = [int(s["reps"]) for s in sets]
-    return " × ".join([str(len(reps)), str(reps[0])]) if len(set(reps)) == 1 else " / ".join(map(str, reps))
+    per_side = all(s.get("reps_per_side") is not None for s in sets)
+    reps = [int(s["reps_per_side"] if per_side else s["reps"]) for s in sets]
+    suffix = " por lado" if per_side else (" segundos" if session.get("duration_unit") == "seconds" or session.get("exercise") == "Plancha común" else "")
+    return ( " × ".join([str(len(reps)), str(reps[0])]) if len(set(reps)) == 1 else " / ".join(map(str, reps))) + suffix
 
 
 def _status_label(session: dict) -> str:

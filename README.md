@@ -81,3 +81,15 @@ Cada modificación se registra como commit. El público puede consultar la rutin
 ## Independencia del laboratorio
 
 Este proyecto **NO** modifica ni comparte archivos con \`Edu-Flores-Grancelli-lab\`. Ambos pueden desplegarse con URL diferentes.
+
+## Bloque de hipertrofia y rutinas antiguas
+
+- `data/active_plan.json` contiene las doce semanas del nuevo bloque: core y movilidad en dos vueltas, principales con tres series de 8–12 a RIR 2 y descansos explícitos.
+- `data/plan.json` sigue siendo el plan anterior completo. No se reescriben sus 565 entradas ni las sesiones históricas para activar el nuevo plan.
+- **Mi rutina** y **Rutina resumen** muestran el bloque nuevo. **Rutinas antiguas** permite consultar semanas, ejercicios, últimas cargas, mejores cargas comparables, referencias sin fecha y evolución de reportes anteriores.
+- Las nuevas sesiones tienen `block_id` e identificadores distintos; Semana 1 del nuevo bloque no coincide con Semana 1 del anterior.
+- Los gráficos utilizan equivalencias explícitas de nombres, separan variantes y condiciones de carga, y permiten filtrar por bloque. La primera sesión efectivamente registrada del bloque nuevo se marca en la curva; no se inventa una fecha de entrenamiento.
+- Los pesos por mancuerna o por lado se conservan como tales, sin convertirlos en carga total ni sumar barras o plataformas desconocidas. Los giros rusos se ingresan por lado y se almacenan también como repeticiones totales para conservar la convención previa; la plancha se ingresa en segundos.
+- Al guardar una sesión se conserva el documento histórico completo, incluidos otros metadatos; solo se actualiza el registro identificado por fecha y ejercicio del bloque nuevo.
+
+Validación: `python -m unittest -v test_blocks.py` y arranque con `streamlit.testing.v1.AppTest`. El cambio se probó también con guardado simulado, sin crear entrenamientos reales.
